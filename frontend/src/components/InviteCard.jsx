@@ -4,12 +4,13 @@ import { useApi } from '../hooks/useApi';
 import { useNow } from '../hooks/useNow';
 import { useToast } from '../context/ToastContext';
 import { timeLeft } from '../lib/dates';
+import { cn } from '../lib/cn';
 import { copyText, shareOrFalse } from '../lib/feedback';
 import { Icon } from './Icon';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
+import { inputClass } from './ui/Field';
 import { Skeleton } from './ui/Skeleton';
-import { Tile } from './ui/Tile';
 
 /** The group's invite link: share, copy, see when it expires; admins can replace it. */
 export function InviteCard({ groupId, groupName, isAdmin, headline }) {
@@ -37,33 +38,33 @@ export function InviteCard({ groupId, groupName, isAdmin, headline }) {
     }
   }
 
+  // A note ruled off on its own: the link in a read-only field, when it runs out, and two ways to send it.
   return (
-    <Card className="p-4">
-      <div className="flex items-start gap-3">
-        <Tile icon="userPlus" tone="tone-accent" size="sm" />
-        <div className="min-w-0 flex-1">
-          <h3 className="text-[16px] font-semibold">{headline || 'Invite link'}</h3>
-          <p className="mt-0.5 text-[14px] text-ink-2">Anyone with the link can join. It works for 24 hours.</p>
-        </div>
-      </div>
-      <div className="mt-3.5 flex items-center gap-2 rounded-xl border border-line bg-surface-2 py-2 pr-2 pl-3">
-        <Icon name="link" size={16} className="shrink-0 text-ink-3" />
+    <Card>
+      {headline && <h3 className="pt-0.5 text-[17px] leading-6 font-semibold">{headline}</h3>}
+      <p className="mt-0.5 text-[15px] leading-snug text-ink-2">Anyone with the link can join. It works for 24 hours.</p>
+      <div className="mt-4">
         {invite.data ? (
-          <span className="min-w-0 flex-1 truncate font-mono text-[13px] text-ink-2">{url.replace(/^https?:\/\//, '')}</span>
+          <input
+            readOnly
+            value={url.replace(/^https?:\/\//, '')}
+            aria-label="Invite link"
+            onFocus={(e) => e.target.select()}
+            className={cn(inputClass, 'truncate text-[15px] text-ink-2')}
+          />
         ) : (
-          <Skeleton className="h-3.5 flex-1" />
+          <div aria-hidden="true" className={cn(inputClass, 'flex items-center')}>
+            <Skeleton className="h-3.5 flex-1" />
+          </div>
         )}
+        <p className="mt-2 text-[14px] text-ink-2">{left ? `Expires in ${left}` : 'Making a link…'}</p>
       </div>
-      <p className="mt-2 flex items-center gap-1.5 px-0.5 text-[13px] text-ink-3">
-        <Icon name="clock" size={14} />
-        {left ? `Expires in ${left}` : 'Making a link…'}
-      </p>
-      <div className="mt-3.5 grid grid-cols-2 gap-2">
-        <Button variant="primary" onClick={share} disabled={!invite.data} icon={<Icon name="share" size={18} />}>
-          Share
-        </Button>
+      <div className="mt-4 grid grid-cols-2 gap-2">
         <Button variant="secondary" onClick={copy} disabled={!invite.data} icon={<Icon name="copy" size={18} />}>
           Copy link
+        </Button>
+        <Button variant="primary" onClick={share} disabled={!invite.data} icon={<Icon name="share" size={18} />}>
+          Share
         </Button>
       </div>
       {isAdmin && (
@@ -71,9 +72,8 @@ export function InviteCard({ groupId, groupName, isAdmin, headline }) {
           type="button"
           onClick={reset}
           disabled={resetting}
-          className="mt-3 flex items-center gap-1.5 rounded-lg px-0.5 text-[13.5px] font-medium text-ink-2 hover:text-ink disabled:opacity-50"
+          className="mt-2 -mb-1.5 flex min-h-11 items-center rounded-lg pt-0.5 text-left text-[14px] font-medium text-ink-2 underline decoration-[1.5px] underline-offset-4 hover:text-ink disabled:opacity-50"
         >
-          <Icon name="refresh" size={14} />
           {resetting ? 'Making a new link…' : 'Make a new link (the old one stops working)'}
         </button>
       )}

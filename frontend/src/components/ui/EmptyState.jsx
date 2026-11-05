@@ -1,12 +1,15 @@
 import { cn } from '../../lib/cn';
-import { Tile } from './Tile';
 
-export function EmptyState({ icon = 'receipt', tone = 'tone-accent', title, children, action, className }) {
+/**
+ * Nothing here yet. A heading, one sentence on what to do, and the button that does it.
+ * (`icon` and `tone` are accepted from older screens and ignored: this design uses words, not pictures.)
+ */
+// eslint-disable-next-line no-unused-vars
+export function EmptyState({ icon, tone, title, children, action, className }) {
   return (
-    <div className={cn('flex flex-col items-center px-6 py-12 text-center', className)}>
-      <Tile icon={icon} tone={tone} size="lg" />
-      <h3 className="mt-4 text-[18px] font-semibold tracking-[-0.01em]">{title}</h3>
-      {children && <p className="mt-1.5 max-w-[36ch] text-[15px] leading-relaxed text-ink-2">{children}</p>}
+    <div className={cn('border-y border-line py-10', className)}>
+      <h3 className="font-display text-[22px] leading-8">{title}</h3>
+      {children && <p className="mt-2 max-w-[42ch] text-[16px] leading-relaxed text-ink-2">{children}</p>}
       {action && <div className="mt-6">{action}</div>}
     </div>
   );

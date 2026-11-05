@@ -35,7 +35,7 @@ export const HOME_SCREEN = `
       added_by { id name }
       group { id name kind member_count }
     }
-    groups { id name kind member_count my_balance_paise last_activity_at }
+    groups { id name kind member_count my_balance_paise total_spent_paise last_activity_at }
     my_balance { owed_to_me_paise i_owe_paise net_paise groups_owed groups_owe }
     recent_activity(limit: 10) {
       ...ActivityFields
@@ -44,10 +44,10 @@ export const HOME_SCREEN = `
   }
   ${ACTIVITY_FIELDS}`;
 
-/** Laptop sidebar: the same groups, but only the four fields it shows. */
+/** Laptop sidebar: the same groups, but only the fields it shows. */
 export const SIDEBAR_GROUPS = `
   query SidebarGroups {
-    groups { id name kind my_balance_paise }
+    groups { id name kind my_balance_paise total_spent_paise }
   }`;
 
 /** Group screen: header, members, expenses and payments together. */

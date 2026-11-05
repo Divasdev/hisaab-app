@@ -4,65 +4,61 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ── Colour tokens ─────────────────────────────────────────────
-   One muted accent (indigo). Green and red are kept only for money direction:
-   owed = money comes back to you, owe = you have to pay. */
+   "Last Page": hisaab kept the way friends keep it on a notebook's last page.
+   White page, dark ink, ballpoint blue as the only brand colour.
+   Red and green only ever mean money direction: owe = you pay, owed = you get back.
+   accent = blue used as a fill (buttons); accent-text = blue used for text, lines and underlines. */
 :root {
-  --bg: #f4f3ef;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f7f6f3;
-  --sunken: #eceae4;
-  --line: #e4e2db;
-  --line-strong: #d4d1c8;
-  --ink: #1c1d20;
+  --surface-2: #f6f7f9;
+  --sunken: #eef0f3;
+  --line: #d9dbe0;
+  --line-strong: #b4b8c0;
+  --ink: #1b1c1f;
   --ink-2: #5d5f66;
-  --ink-3: #67696f;
-  --accent: #3f4c8f;
-  --accent-hover: #35407a;
+  --ink-3: #686b73;
+  --accent: #1d3f9e;
+  --accent-hover: #17337f;
   --accent-ink: #ffffff;
-  --accent-soft: #eceef8;
-  --accent-text: #3f4c8f;
-  --owed: #1d7548;
-  --owed-soft: #e5f2ea;
-  --owe: #b3392b;
-  --owe-soft: #fbeae7;
-  --scrim: rgb(20 21 24 / 0.32);
-
-  /* Frosted materials. Bars are lighter, sheets are thicker (bigger surface = heavier material). */
-  --glass-bar: rgb(250 249 246 / 0.72);
-  --glass-sheet: rgb(255 255 255 / 0.84);
-  --glass-edge: rgb(255 255 255 / 0.65);
-  --glass-line: rgb(28 29 32 / 0.08);
-  --toast: rgb(32 33 38 / 0.9);
+  --accent-soft: #e9eefa;
+  --accent-text: #1d3f9e;
+  --owed: #1f7a45;
+  --owed-soft: #e7f3eb;
+  --owe: #c7352b;
+  --owe-soft: #fbeceb;
+  --scrim: rgb(27 28 31 / 0.42);
+  --toast: #1b1c1f;
+  --toast-ink: #ffffff;
+  --toast-action: #a9bdf7;
 
   color-scheme: light;
 }
 
+/* The same notebook at night: near-black page, light ink, a lighter ballpoint blue. */
 .dark {
-  --bg: #111214;
-  --surface: #1a1b1f;
-  --surface-2: #202126;
-  --sunken: #26272d;
-  --line: #2c2d33;
-  --line-strong: #3a3b42;
-  --ink: #ededef;
-  --ink-2: #a6a8b0;
-  --ink-3: #9092a0;
-  --accent: #5865c4;
-  --accent-hover: #6672d0;
+  --bg: #121316;
+  --surface: #17181c;
+  --surface-2: #1c1e22;
+  --sunken: #24262b;
+  --line: #2c2f35;
+  --line-strong: #464a53;
+  --ink: #eceef1;
+  --ink-2: #a6a9b1;
+  --ink-3: #9599a2;
+  --accent: #3c5bc9;
+  --accent-hover: #4a68d4;
   --accent-ink: #ffffff;
-  --accent-soft: #23263d;
-  --accent-text: #a9b2f2;
-  --owed: #5cc28d;
-  --owed-soft: #16271e;
-  --owe: #f08070;
-  --owe-soft: #2e1a17;
-  --scrim: rgb(0 0 0 / 0.5);
-
-  --glass-bar: rgb(22 23 26 / 0.72);
-  --glass-sheet: rgb(30 31 36 / 0.84);
-  --glass-edge: rgb(255 255 255 / 0.07);
-  --glass-line: rgb(255 255 255 / 0.08);
-  --toast: rgb(46 47 54 / 0.92);
+  --accent-soft: #1e2640;
+  --accent-text: #9bb2f6;
+  --owed: #6fcf97;
+  --owed-soft: #15281d;
+  --owe: #f28b7f;
+  --owe-soft: #2e1916;
+  --scrim: rgb(0 0 0 / 0.6);
+  --toast: #eceef1;
+  --toast-ink: #121316;
+  --toast-action: #1d3f9e;
 
   color-scheme: dark;
 }
@@ -89,97 +85,115 @@
 }
 
 @theme {
-  /* System font: SF Pro on Apple devices, Roboto on Android. Native optical sizing and tracking. */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  /* Hind for everything you read and tap; Martel (both by Indian Type Foundry) for titles and totals. */
+  --font-sans: "Hind", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Martel", Georgia, "Times New Roman", serif;
 
-  --shadow-sheet: 0 -1px 0 0 var(--glass-edge) inset, 0 24px 60px -12px rgb(0 0 0 / 0.28), 0 2px 8px rgb(0 0 0 / 0.06);
-  --shadow-toast: 0 12px 32px -8px rgb(0 0 0 / 0.35);
-  --shadow-lift: 0 1px 2px rgb(0 0 0 / 0.05), 0 4px 14px -6px rgb(0 0 0 / 0.1);
+  --shadow-sheet: 0 -8px 32px -12px rgb(0 0 0 / 0.22);
+  --shadow-toast: 0 10px 28px -10px rgb(0 0 0 / 0.35);
 
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
-  --animate-enter: enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-fade: fade 220ms ease-out both;
-  --animate-pop: pop 360ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  --animate-fade: fade 160ms ease-out both;
+  --animate-rise: rise 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
 
-  @keyframes enter {
-    from { opacity: 0; transform: translateY(8px); }
-  }
   @keyframes fade {
     from { opacity: 0; }
   }
-  @keyframes pop {
-    from { opacity: 0; transform: scale(0.6); }
+  @keyframes rise {
+    from { transform: translateY(12px); opacity: 0; }
   }
 }
 
-/* ── Materials ─────────────────────────────────────────────── */
-@utility glass-bar {
-  background-color: var(--glass-bar);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
-}
-@utility glass-sheet {
-  background-color: var(--glass-sheet);
-  -webkit-backdrop-filter: blur(32px) saturate(190%);
-  backdrop-filter: blur(32px) saturate(190%);
-}
-@utility glass-toast {
-  background-color: var(--toast);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  backdrop-filter: blur(16px) saturate(160%);
+/* ── The notebook marks ─────────────────────────────────────── */
+
+/* A total, double-underlined in ballpoint blue. */
+@utility double-underline {
+  text-decoration-line: underline;
+  text-decoration-style: double;
+  text-decoration-color: var(--accent-text);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.34em;
+  text-decoration-skip-ink: none;
 }
 
-/* Avatar and icon tile colours: soft background + strong foreground, AA contrast in both themes. */
-@utility tone-0 { --tone-bg: #e6ebf7; --tone-fg: #2c467a; }
-@utility tone-1 { --tone-bg: #f6e7dc; --tone-fg: #8a4518; }
-@utility tone-2 { --tone-bg: #e2f0e8; --tone-fg: #23613f; }
-@utility tone-3 { --tone-bg: #f4e3ec; --tone-fg: #84335b; }
-@utility tone-4 { --tone-bg: #ebe7f7; --tone-fg: #4c3b8c; }
-@utility tone-5 { --tone-bg: #f5edd5; --tone-fg: #6d5512; }
-@utility tone-6 { --tone-bg: #dff0f2; --tone-fg: #1d5c66; }
-@utility tone-7 { --tone-bg: #f5e3e0; --tone-fg: #8c3428; }
-@utility tone-n { --tone-bg: var(--sunken); --tone-fg: var(--ink-2); }
-@utility tone-accent { --tone-bg: var(--accent-soft); --tone-fg: var(--accent-text); }
+/* Paid or settled: struck through with one ink line. */
+@utility struck {
+  text-decoration-line: line-through;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: currentColor;
+}
 
-/* Unlayered so these win over the utilities above. */
-.dark .tone-0 { --tone-bg: #1e2740; --tone-fg: #a9bdf0; }
-.dark .tone-1 { --tone-bg: #3a2618; --tone-fg: #f0b48b; }
-.dark .tone-2 { --tone-bg: #17301f; --tone-fg: #8fd6ad; }
-.dark .tone-3 { --tone-bg: #36202b; --tone-fg: #ecaaca; }
-.dark .tone-4 { --tone-bg: #272140; --tone-fg: #bfb2f2; }
-.dark .tone-5 { --tone-bg: #332b14; --tone-fg: #e6cd7c; }
-.dark .tone-6 { --tone-bg: #15303a; --tone-fg: #8dd2dc; }
-.dark .tone-7 { --tone-bg: #3a1e1a; --tone-fg: #f2a497; }
+/* The signature move: a single stroke drawn across a row when it is paid or deleted. */
+@utility strike-draw {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1.5px;
+    background: var(--ink);
+    transform-origin: left center;
+    animation: strike-draw 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    pointer-events: none;
+  }
+}
+@keyframes strike-draw {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums lining-nums;
+}
 
 /* ── Base ──────────────────────────────────────────────────── */
 @layer base {
   html {
     background: var(--bg);
     color: var(--ink);
+    font-family: var(--font-sans);
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition: background-color 250ms ease;
+    scrollbar-color: var(--line-strong) transparent;
+    scrollbar-width: thin;
   }
   body {
     min-height: 100dvh;
     background: var(--bg);
     font-size: 16px;
-    line-height: 1.45;
-    letter-spacing: -0.006em;
+    line-height: 1.5;
+    caret-color: var(--accent-text);
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
   }
   ::selection {
     background: var(--accent-soft);
     color: var(--ink);
   }
   :focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--accent-text);
     outline-offset: 2px;
+  }
+  a {
+    text-underline-offset: 3px;
   }
   button,
   [role="button"],
@@ -194,21 +208,24 @@
     -webkit-appearance: none;
     margin: 0;
   }
+  ::placeholder {
+    color: var(--ink-3);
+    opacity: 1;
+  }
 }
 
-/* People who ask for less transparency get solid bars and sheets. */
-@media (prefers-reduced-transparency: reduce) {
-  .glass-bar { background-color: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
-  .glass-sheet { background-color: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
-  .glass-toast { background-color: #202126; -webkit-backdrop-filter: none; backdrop-filter: none; }
-}
 @media (prefers-contrast: more) {
-  :root { --line: #b9b6ac; --ink-2: #44464c; --glass-bar: var(--surface); --glass-sheet: var(--surface); }
+  :root {
+    --line: #9a9ea6;
+    --ink-2: #44464c;
+  }
 }
 
-/* Reduced motion: no slides or springs, only quick fades. */
+/* Reduced motion: no slides or strokes, things simply appear. */
 @media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
+  *,
+  ::before,
+  ::after {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;

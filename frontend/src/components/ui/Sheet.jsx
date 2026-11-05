@@ -5,7 +5,7 @@ import { cn } from '../../lib/cn';
 import { Icon } from '../Icon';
 
 /**
- * Bottom sheet on a frosted-glass material.
+ * Bottom sheet on a solid surface.
  * - opens with a critically damped spring (no bounce)
  * - drag the top area down to close; the finger's speed is handed to the closing spring
  * - a flick is projected forward (like iOS) to decide close vs. snap back
@@ -171,8 +171,8 @@ export function Sheet({ open, onClose, title, description, children, footer, cla
         aria-labelledby={title ? titleId : undefined}
         tabIndex={-1}
         className={cn(
-          'glass-sheet shadow-sheet absolute inset-x-0 bottom-0 mx-auto flex max-h-[min(90dvh,780px)] w-full max-w-lg flex-col rounded-t-[24px] outline-none will-change-transform',
-          'sm:bottom-4 sm:w-[calc(100%-32px)] sm:rounded-[24px]',
+          'absolute inset-x-0 bottom-0 mx-auto flex max-h-[min(90dvh,780px)] w-full max-w-lg flex-col rounded-t-2xl border-t border-line bg-surface shadow-sheet outline-none will-change-transform',
+          'sm:bottom-4 sm:w-[calc(100%-32px)] sm:rounded-2xl sm:border',
           className,
         )}
       >
@@ -183,29 +183,29 @@ export function Sheet({ open, onClose, title, description, children, footer, cla
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
         >
-          <div aria-hidden="true" className="mx-auto mb-2.5 h-[5px] w-9 rounded-full bg-ink/15" />
+          <div aria-hidden="true" className="mx-auto mb-3 h-1 w-10 rounded-sm bg-line-strong" />
           {title && (
-            <div className="flex items-start gap-3 pb-3">
-              <div className="min-w-0 flex-1 pt-0.5">
-                <h2 id={titleId} className="text-[19px] leading-tight font-semibold tracking-[-0.015em]">
+            <div className="flex items-start gap-3 pb-4">
+              <div className="min-w-0 flex-1 pt-1">
+                <h2 id={titleId} className="font-display text-[22px] leading-8">
                   {title}
                 </h2>
-                {description && <p className="mt-1 text-[14.5px] leading-snug text-ink-2">{description}</p>}
+                {description && <p className="mt-1 text-[15px] leading-snug text-ink-2">{description}</p>}
               </div>
               <button
                 type="button"
                 aria-label="Close"
                 onClick={() => onCloseRef.current?.()}
-                className="-mr-1.5 grid size-8 shrink-0 place-items-center rounded-full bg-ink/6 text-ink-2 transition-[transform,background-color] hover:bg-ink/10 active:scale-90"
+                className="-mr-2 grid size-11 shrink-0 place-items-center rounded-lg text-ink-2 hover:bg-sunken hover:text-ink"
               >
-                <Icon name="x" size={17} strokeWidth={2.2} />
+                <Icon name="x" size={18} />
               </button>
             </div>
           )}
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-5">{children}</div>
         {footer ? (
-          <div className="shrink-0 border-t border-[var(--glass-line)] px-5 pt-3 pb-[max(16px,env(safe-area-inset-bottom))]">{footer}</div>
+          <div className="shrink-0 border-t border-line px-5 pt-3 pb-[max(16px,env(safe-area-inset-bottom))]">{footer}</div>
         ) : (
           <div className="shrink-0 pb-[env(safe-area-inset-bottom)]" />
         )}
@@ -228,18 +228,18 @@ export function ConfirmSheet({ open, onClose, title, children, confirmLabel, onC
             type="button"
             onClick={onConfirm}
             disabled={busy}
-            className="h-[52px] rounded-[14px] bg-owe text-[17px] font-semibold text-white transition-transform active:scale-[0.97] disabled:opacity-50"
+            className="h-14 rounded-xl bg-owe pt-0.5 text-[18px] font-semibold text-white disabled:opacity-50 dark:text-[#121316]"
           >
             {busy ? 'Working…' : confirmLabel}
           </button>
-          <button type="button" onClick={onClose} className="h-11 rounded-xl text-[16px] font-semibold text-ink-2 hover:bg-ink/5">
+          <button type="button" onClick={onClose} className="h-12 rounded-[10px] pt-0.5 text-[16px] font-semibold text-ink-2 hover:bg-sunken">
             Cancel
           </button>
         </div>
       }
     >
-      <div className="text-[15.5px] leading-relaxed text-ink-2">{children}</div>
-      {error && <p className="mt-3 rounded-xl bg-owe-soft px-3.5 py-2.5 text-[14.5px] text-owe">{error}</p>}
+      <div className="text-[16px] leading-relaxed text-ink-2">{children}</div>
+      {error && <p className="mt-3 rounded-[10px] border-[1.5px] border-owe px-3.5 py-2.5 text-[15px] font-medium text-owe">{error}</p>}
     </Sheet>
   );
 }

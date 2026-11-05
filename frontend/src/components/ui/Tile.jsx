@@ -1,19 +1,15 @@
 import { cn } from '../../lib/cn';
-import { Icon } from '../Icon';
 
-const sizes = {
-  xs: ['size-7 rounded-lg', 15],
-  sm: ['size-9 rounded-[10px]', 18],
-  md: ['size-11 rounded-xl', 21],
-  lg: ['size-14 rounded-2xl', 26],
-};
-
-/** A soft coloured square with an icon: categories, group kinds, activity types. */
-export function Tile({ icon, tone = 'tone-n', size = 'md', className }) {
-  const [box, px] = sizes[size];
+/**
+ * A small word tag ("Food", "Trip"). Replaces the old coloured icon squares: this design names things
+ * instead of drawing them. Pass `label`; without one nothing is drawn, so leftover icon-only calls vanish.
+ */
+// eslint-disable-next-line no-unused-vars
+export function Tile({ label, icon, tone, size, className }) {
+  if (!label) return null;
   return (
-    <span aria-hidden="true" className={cn('grid shrink-0 place-items-center bg-[var(--tone-bg)] text-[var(--tone-fg)]', tone, box, className)}>
-      <Icon name={icon} size={px} />
+    <span className={cn('inline-flex h-6 shrink-0 items-center rounded-[5px] border border-line-strong px-1.5 pt-0.5 text-[12px] font-semibold text-ink-2', className)}>
+      {label}
     </span>
   );
 }

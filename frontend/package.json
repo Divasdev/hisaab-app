@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/hind": "^5.3.0",
+    "@fontsource/martel": "^5.3.0",
     "@vercel/analytics": "^2.0.1",
     "graphql": "^16.15.0",
     "react": "^19.3.1",

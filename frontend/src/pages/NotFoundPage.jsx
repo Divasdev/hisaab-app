@@ -1,15 +1,17 @@
 import { useTitle } from '../hooks/useTitle';
 import { Button } from '../components/ui/Button';
-import { EmptyState } from '../components/ui/EmptyState';
+import { LargeTitle } from '../components/ui/Page';
 import { AuthFrame } from '../components/AuthFrame';
 
 export default function NotFoundPage() {
   useTitle('Page not found');
   return (
     <AuthFrame>
-      <EmptyState icon="info" tone="tone-n" title="This page doesn't exist" className="px-0" action={<Button to="/">Go to my groups</Button>}>
-        The link may be old or mistyped.
-      </EmptyState>
+      <LargeTitle className="mt-10">Page not found</LargeTitle>
+      <p className="mt-2 text-[16px] leading-relaxed text-ink-2">The link may be old or mistyped.</p>
+      <Button to="/" size="lg" full className="mt-8">
+        Go to my groups
+      </Button>
     </AuthFrame>
   );
 }

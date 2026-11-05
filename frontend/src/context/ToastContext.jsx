@@ -36,10 +36,9 @@ export function ToastProvider({ children }) {
         {toast && (
           <div
             key={toast.id}
-            className="glass-toast shadow-toast pointer-events-auto flex w-full max-w-md animate-enter items-center gap-3 rounded-2xl py-2.5 pr-2 pl-4 text-[15px] text-white"
+            className="pointer-events-auto flex w-full max-w-md animate-rise items-center gap-3 rounded-xl bg-(--toast) py-2 pr-1.5 pl-4 text-[16px] text-(--toast-ink) shadow-toast"
           >
-            <Icon name={toast.icon} size={20} className="shrink-0 text-[#9fe0bb]" />
-            <span className="flex-1 py-1 leading-snug">{toast.message}</span>
+            <span className="flex-1 pt-1.5 pb-1 leading-snug">{toast.message}</span>
             {toast.action ? (
               <button
                 type="button"
@@ -47,13 +46,13 @@ export function ToastProvider({ children }) {
                   toast.action.onClick();
                   dismiss();
                 }}
-                className="h-9 rounded-[10px] px-3 font-semibold text-[#b9c2ff] transition-transform duration-100 active:scale-95 hover:bg-white/10"
+                className="h-11 rounded-lg px-3.5 pt-0.5 font-semibold text-(--toast-action) underline decoration-[1.5px] underline-offset-4"
               >
                 {toast.action.label}
               </button>
             ) : (
-              <button type="button" onClick={dismiss} aria-label="Dismiss" className="grid size-9 place-items-center rounded-[10px] text-white/70 hover:bg-white/10">
-                <Icon name="x" size={18} />
+              <button type="button" onClick={dismiss} aria-label="Dismiss" className="grid size-11 place-items-center rounded-lg text-(--toast-ink) opacity-75">
+                <Icon name="x" size={16} />
               </button>
             )}
           </div>

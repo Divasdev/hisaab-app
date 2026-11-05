@@ -26,7 +26,7 @@ export function ThemeProvider({ children }) {
     const apply = () => {
       const dark = theme === 'dark' || (theme === 'system' && media.matches);
       document.documentElement.classList.toggle('dark', dark);
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#111214' : '#F4F3EF');
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#121316' : '#ffffff');
     };
     apply();
     media.addEventListener('change', apply);

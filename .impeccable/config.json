@@ -1,0 +1,42 @@
+{
+  "hook": {
+    "enabled": true,
+    "limits": {
+      "maxFindings": 5,
+      "maxChars": 8000
+    }
+  },
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-11-05T11:20:30.436Z",
+        "reason": "Agent: decision sketch only; render shows ~14px clearance between row text and each painted rule, fixed-height flex rows trip the box check"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/model-pick.html"
+        ],
+        "createdAt": "2026-11-05T11:21:02.090Z",
+        "reason": "Agent: decision sketch only; render shows ~14px clearance between row text and each rule, fixed-height flex rows trip the box check"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/*.html"
+        ],
+        "createdAt": "2026-11-05T12:09:26.945Z",
+        "reason": "Agent: decision-round sketches of other directions use their own fonts by design; they are not product UI"
+      }
+    ]
+  }
+}

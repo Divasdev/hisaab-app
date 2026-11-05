@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Hisaab Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
+<style>
+:root{--marigold:#f2a20c;--ink:#161514;--paper:#ffffff;--peacock:#0b6e8a;--owe:#c0261b;--get:#12784a;--muted:#5c5a55}
+*{box-sizing:border-box}
+html,body{width:390px;height:844px;overflow:hidden;margin:0}
+body{position:relative;background:var(--paper);color:var(--ink);font-family:"Anek Latin",system-ui,sans-serif;font-stretch:100%;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:3px solid var(--peacock);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* Printed label: 2.5px ink rule, 3px marigold gap, 1px ink rule */
+.label{margin:12px 12px 0;border:2.5px solid var(--ink);padding:3px;background:var(--marigold);border-radius:2px}
+.label-in{border:1px solid var(--ink);background:var(--marigold)}
+.label-body{padding:12px 16px}
+.top{display:flex;align-items:center;justify-content:space-between}
+.brand{margin:0;font-size:44px;font-weight:800;font-stretch:75%;letter-spacing:.02em;line-height:1}
+.plate{width:40px;height:40px;display:grid;place-items:center;background:var(--ink);color:var(--marigold);border-radius:2px;font-size:19px;font-weight:800;font-stretch:75%;letter-spacing:.04em}
+.rule{height:1px;background:var(--ink);margin:10px 0 8px}
+.hi{margin:0;font-size:16px;line-height:1.3}
+.total{margin:4px 0 0}
+.total-word{display:block;font-size:26px;font-weight:700;font-stretch:75%;line-height:1}
+.total-amt{display:block;font-size:60px;font-weight:800;font-stretch:75%;line-height:.95;letter-spacing:.005em}
+.over{margin:0;font-size:15px;line-height:1.3}
+.band{display:flex;align-items:center;padding:9px 16px;line-height:16px;background:var(--peacock);color:#ffffff;font-size:14px;font-weight:500}
+.band b{font-weight:600}
+
+/* Groups */
+main{padding:0 16px}
+.sec{display:flex;align-items:center;justify-content:space-between;margin:20px 0 12px}
+.sec h2{margin:0;font-size:26px;font-weight:700;font-stretch:75%;line-height:1}
+.btn-new{height:40px;display:inline-flex;align-items:center;padding:0 14px;background:#ffffff;color:var(--ink);border:2px solid var(--ink);border-radius:4px;font:600 15px/1 "Anek Latin",system-ui,sans-serif;cursor:pointer}
+.groups{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink)}
+.groups li{border-bottom:1.5px solid var(--ink)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 0}
+.l{min-width:0}
+.name{display:flex;align-items:center;gap:8px;margin:0;font-size:17px;font-weight:600;line-height:1.25;white-space:nowrap}
+.tag{flex:none;padding:4px 6px;background:var(--peacock);color:#ffffff;border-radius:2px;font-size:11px;font-weight:700;font-stretch:75%;letter-spacing:.06em;line-height:1}
+.meta{margin:4px 0 0;font-size:14px;line-height:1.3;color:var(--muted)}
+.r{flex:none;text-align:right}
+.dir{display:block;font-size:13px;font-weight:600;line-height:1.2}
+.amt{display:block;font-size:26px;font-weight:700;font-stretch:75%;line-height:1.05}
+.get{color:var(--get)}
+.owe{color:var(--owe)}
+.set{color:var(--muted)}
+
+/* Bottom bar */
+.bar{position:absolute;left:0;right:0;bottom:0;padding:16px;background:#ffffff;border-top:1.5px solid var(--ink)}
+.add{width:100%;height:56px;display:flex;align-items:center;justify-content:center;background:var(--ink);color:var(--marigold);border:0;border-radius:4px;font:800 24px/1 "Anek Latin",system-ui,sans-serif;font-stretch:75%;letter-spacing:.02em;cursor:pointer}
+</style>
+</head>
+<body>
+<header class="label">
+  <div class="label-in">
+    <div class="label-body">
+      <div class="top">
+        <h1 class="brand">HISAAB</h1>
+        <a class="plate" href="#" aria-label="Account, Divas Sharma">DS</a>
+      </div>
+      <div class="rule"></div>
+      <p class="hi">Hi, Divas</p>
+      <p class="total">
+        <span class="total-word">You owe</span>
+        <span class="total-amt num">₹10,532.09</span>
+      </p>
+      <p class="over">overall, across 3 groups</p>
+    </div>
+    <div class="band num"><span><b>₹10,611.34</b> to pay · <b>₹79.25</b> to get back</span></div>
+  </div>
+</header>
+
+<main>
+  <div class="sec">
+    <h2>Groups</h2>
+    <button class="btn-new" type="button">+ New group</button>
+  </div>
+  <ul class="groups">
+    <li><a class="row" href="#">
+      <div class="l">
+        <p class="name"><span class="tag">ROOM</span>Room 204, Godavari</p>
+        <p class="meta">4 members · 46 min ago</p>
+      </div>
+      <div class="r get"><span class="dir">you get back</span><span class="amt num">₹79.25</span></div>
+    </a></li>
+    <li><a class="row" href="#">
+      <div class="l">
+        <p class="name"><span class="tag">FLAT</span>Flat 3B, Koramangala</p>
+        <p class="meta">3 members · Yesterday</p>
+      </div>
+      <div class="r owe"><span class="dir">you owe</span><span class="amt num">₹1,818.00</span></div>
+    </a></li>
+    <li><a class="row" href="#">
+      <div class="l">
+        <p class="name"><span class="tag">TRIP</span>Goa trip, October</p>
+        <p class="meta">6 members · 26 Oct</p>
+      </div>
+      <div class="r owe"><span class="dir">you owe</span><span class="amt num">₹8,793.34</span></div>
+    </a></li>
+    <li><a class="row" href="#">
+      <div class="l">
+        <p class="name"><span class="tag">EVENT</span>Navratri dandiya night</p>
+        <p class="meta">5 members · 2 Oct</p>
+      </div>
+      <div class="r set"><span class="dir">settled</span><span class="amt num">₹0.00</span></div>
+    </a></li>
+  </ul>
+</main>
+
+<nav class="bar" aria-label="Primary">
+  <button class="add" type="button">+ Add expense</button>
+</nav>
+</body>
+</html>

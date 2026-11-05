@@ -9,31 +9,35 @@ export const initials = (name = '') =>
     .join('')
     .toUpperCase();
 
-/** Same name, same colour, everywhere (recognition over recall). Works for people who have not joined too. */
-export function toneFor(name = '') {
-  let h = 7;
-  for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  return `tone-${h % 8}`;
+/** Kept for older callers. People are told apart by their initials and names, not by colour. */
+export function toneFor() {
+  return '';
 }
 
 const sizes = {
-  xs: 'size-6 text-[10px]',
-  sm: 'size-8 text-[12px]',
-  md: 'size-10 text-[14px]',
-  lg: 'size-14 text-[19px]',
-  xl: 'size-20 text-[27px]',
+  xs: 'size-6 rounded-[5px] text-[10px]',
+  sm: 'size-8 rounded-md text-[12px]',
+  md: 'size-10 rounded-lg text-[14px]',
+  lg: 'size-14 rounded-[10px] text-[19px]',
+  xl: 'size-20 rounded-xl text-[27px]',
 };
 
-/** pending: this person was added by name and has not joined yet (dashed outline). */
-export function Avatar({ user, size = 'md', short = false, pending, className }) {
+/**
+ * A person's initials in a square plate. `me` fills it with ballpoint blue (that's you).
+ * pending: this person was added by name and has not joined yet (dashed outline).
+ */
+export function Avatar({ user, size = 'md', short = false, pending, me = false, className }) {
   const isPending = pending ?? user?.joined === false;
   return (
     <span
       aria-hidden="true"
       className={cn(
-        'inline-grid shrink-0 place-items-center rounded-full font-semibold tracking-[0.02em] select-none',
-        isPending ? 'border-[1.5px] border-dashed border-line-strong bg-surface text-ink-2' : 'bg-[var(--tone-bg)] text-[var(--tone-fg)]',
-        toneFor(user?.name),
+        'inline-grid shrink-0 place-items-center pt-0.5 font-semibold select-none',
+        me
+          ? 'bg-accent text-accent-ink'
+          : isPending
+            ? 'border-[1.5px] border-dashed border-line-strong bg-surface text-ink-2'
+            : 'border-[1.5px] border-line-strong bg-surface text-ink',
         sizes[size],
         className,
       )}
@@ -47,13 +51,11 @@ export function AvatarStack({ users = [], max = 4, size = 'sm', className }) {
   const shown = users.slice(0, max);
   const extra = users.length - shown.length;
   return (
-    <span className={cn('flex items-center', className)}>
-      {shown.map((u, i) => (
-        <Avatar key={u.id} user={u} size={size} short className={cn('ring-2 ring-[var(--bg)]', i > 0 && (size === 'xs' ? '-ml-1.5' : '-ml-2'))} />
+    <span className={cn('flex items-center gap-1', className)}>
+      {shown.map((u) => (
+        <Avatar key={u.id} user={u} size={size} short />
       ))}
-      {extra > 0 && (
-        <span className={cn('-ml-2 inline-grid place-items-center rounded-full bg-sunken font-semibold text-ink-2 ring-2 ring-[var(--bg)]', sizes[size])}>+{extra}</span>
-      )}
+      {extra > 0 && <span className="pl-1 text-[13px] font-semibold text-ink-2">+{extra}</span>}
     </span>
   );
 }

@@ -1,23 +1,21 @@
 import { useState } from 'react';
-import { api } from '../api';
 import { Link, useNavigate } from 'react-router';
-import { gql } from '../api';
+import { api, gql } from '../api';
 import { HOME_SCREEN } from '../api/queries';
 import { useApi } from '../hooks/useApi';
 import { useTitle } from '../hooks/useTitle';
 import { useAuth } from '../context/AuthContext';
-import { cn } from '../lib/cn';
 import { formatINR } from '../lib/money';
-import { kindById } from '../lib/categories';
 import { useToast } from '../context/ToastContext';
-import { Tile } from '../components/ui/Tile';
 import { Icon } from '../components/Icon';
 import { ActivityItem } from '../components/ActivityItem';
 import { GroupRow } from '../components/GroupRow';
 import { Avatar } from '../components/ui/Avatar';
+import { Wordmark } from '../components/ui/Brand';
 import { Button } from '../components/ui/Button';
 import { Card, List, SectionHeader } from '../components/ui/Card';
 import { EmptyState } from '../components/ui/EmptyState';
+import { BigTotal } from '../components/ui/Money';
 import { BottomBar, Content, LargeTitle, Page, TopBar } from '../components/ui/Page';
 import { Sheet } from '../components/ui/Sheet';
 import { ListSkeleton, Skeleton } from '../components/ui/Skeleton';
@@ -42,30 +40,38 @@ export default function HomePage() {
   return (
     <Page>
       <TopBar
-        title="Groups"
+        title="Your hisaab"
+        left={
+          <Link to="/" className="rounded-md px-2 pt-1 lg:hidden">
+            <Wordmark />
+          </Link>
+        }
         right={
-          <Link to="/account" aria-label="Account" className="rounded-full transition-transform active:scale-95 lg:hidden">
-            <Avatar user={user} size="sm" />
+          <Link to="/account" aria-label="Account" className="rounded-lg lg:hidden">
+            <Avatar user={user} size="md" me />
           </Link>
         }
       />
       <Content>
-        <p className="px-1 text-[15px] text-ink-2">Hi, {user?.name.split(' ')[0]}</p>
-        <LargeTitle>
-          <span className="lg:hidden">Your groups</span>
-          <span className="hidden lg:inline">Overview</span>
-        </LargeTitle>
+        <p className="pt-2 text-[16px] text-ink-2">Hi, {user?.name.split(' ')[0]}</p>
+        <div className="flex items-end justify-between gap-4">
+          <LargeTitle>Your hisaab</LargeTitle>
+          {!none && (
+            <Button className="mb-1 max-lg:hidden" icon={<Icon name="plus" size={16} />} onClick={addExpense} disabled={!list}>
+              Add expense
+            </Button>
+          )}
+        </div>
 
+        {!none && <Overall data={home.data?.my_balance} />}
         <PendingInvites invites={home.data?.my_invites} />
-        {!none && <OverallCard data={home.data?.my_balance} />}
 
         {none ? (
           <EmptyState
-            icon="users"
             title="No groups yet"
-            className="mt-6"
+            className="mt-8"
             action={
-              <Button size="lg" to="/groups/new" icon={<Icon name="plus" />}>
+              <Button size="lg" to="/groups/new" icon={<Icon name="plus" size={18} />}>
                 Create a group
               </Button>
             }
@@ -79,8 +85,7 @@ export default function HomePage() {
                 id="groups-h"
                 title="Groups"
                 action={
-                  // Tinted, not solid: "Add expense" is the one solid button on this screen, so the two don't compete.
-                  <Button variant="tinted" size="sm" to="/groups/new" icon={<Icon name="plus" size={17} strokeWidth={2.2} />} className="h-10 px-3.5">
+                  <Button variant="secondary" size="sm" to="/groups/new" icon={<Icon name="plus" size={15} />}>
                     New group
                   </Button>
                 }
@@ -112,15 +117,15 @@ export default function HomePage() {
       </Content>
 
       {!none && (
-        <BottomBar>
-          <Button size="lg" full icon={<Icon name="plus" size={21} strokeWidth={2.2} />} onClick={addExpense} disabled={!list}>
+        <BottomBar desktop={false}>
+          <Button size="lg" full icon={<Icon name="plus" size={18} />} onClick={addExpense} disabled={!list}>
             Add expense
           </Button>
         </BottomBar>
       )}
 
       <Sheet open={picking} onClose={() => setPicking(false)} title="Add an expense to…" description="Pick the group it belongs to.">
-        <List className="bg-surface/70">
+        <List>
           {list?.map((g) => (
             <GroupRow key={g.id} group={g} onClick={() => navigate(`/groups/${g.id}/add`)} />
           ))}
@@ -142,88 +147,75 @@ function PendingInvites({ invites }) {
     try {
       if (accept) {
         const { group_id } = await api.acceptInvite(inv.member_id);
-        toast(`You joined ${inv.group.name}`, { icon: 'userPlus' });
+        toast(`You joined ${inv.group.name}`);
         navigate(`/groups/${group_id}`);
       } else {
         await api.declineInvite(inv.member_id);
-        toast('Invite removed', { icon: 'x' });
+        toast('Invite removed');
       }
     } catch (err) {
-      toast(err.detail || err.message, { icon: 'info' });
+      toast(err.detail || err.message);
     } finally {
       setBusy(null);
     }
   }
 
   return (
-    <section aria-label="Invites" className="mt-5 space-y-3">
-      {invites.map((inv) => {
-        const kind = kindById(inv.group.kind);
-        return (
-          <Card key={inv.member_id} className="border-accent/30 bg-accent-soft/40 p-4">
-            <div className="flex items-start gap-3">
-              <Tile icon={kind.icon} tone={kind.tone} />
-              <div className="min-w-0 flex-1">
-                <p className="text-[15.5px] leading-snug">
-                  <b className="font-semibold">{inv.added_by.name.split(' ')[0]}</b> added you to <b className="font-semibold">{inv.group.name}</b>
-                </p>
-                <p className="mt-0.5 text-[13.5px] text-ink-2">
-                  as “{inv.name}” · {inv.group.member_count} people
-                </p>
-              </div>
-            </div>
-            <div className="mt-3.5 grid grid-cols-2 gap-2">
-              <Button loading={busy === `${inv.member_id}-true`} disabled={Boolean(busy)} onClick={() => answer(inv, true)}>
-                Join
-              </Button>
-              <Button variant="secondary" loading={busy === `${inv.member_id}-false`} disabled={Boolean(busy)} onClick={() => answer(inv, false)}>
-                Not me
-              </Button>
-            </div>
-          </Card>
-        );
-      })}
+    <section aria-label="Invites" className="mt-8 space-y-3">
+      {invites.map((inv) => (
+        <Card key={inv.member_id}>
+          <p className="text-[16px] leading-snug">
+            <b className="font-semibold">{inv.added_by.name.split(' ')[0]}</b> added you to <b className="font-semibold">{inv.group.name}</b>
+          </p>
+          <p className="mt-0.5 text-[14px] text-ink-2">
+            as “{inv.name}” · {inv.group.member_count} people
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <Button size="sm" loading={busy === `${inv.member_id}-true`} disabled={Boolean(busy)} onClick={() => answer(inv, true)}>
+              Join
+            </Button>
+            <Button size="sm" variant="secondary" loading={busy === `${inv.member_id}-false`} disabled={Boolean(busy)} onClick={() => answer(inv, false)}>
+              Not me
+            </Button>
+          </div>
+        </Card>
+      ))}
     </section>
   );
 }
 
-function OverallCard({ data }) {
+/** What you owe or get back across every group, written like the total at the bottom of a page. */
+function Overall({ data }) {
   if (!data) {
     return (
-      <Card className="mt-5 p-5">
-        <Skeleton className="h-4 w-36" />
-        <Skeleton className="mt-3 h-10 w-44" />
-        <Skeleton className="mt-6 h-12 w-full" />
-      </Card>
+      <div className="mt-7 space-y-3" aria-busy="true">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-12 w-60" />
+        <Skeleton className="h-4 w-52" />
+      </div>
     );
   }
   const net = data.net_paise;
-  const tone = net > 0 ? 'text-owed' : net < 0 ? 'text-owe' : 'text-ink';
+  const lead = net > 0 ? 'You get back, overall' : net < 0 ? 'You owe, overall' : 'Overall';
   return (
-    <Card className="mt-5 overflow-hidden">
-      <div className="px-5 pt-5 pb-4">
-        <p className="text-[15px] text-ink-2">{net > 0 ? 'Overall, you get back' : net < 0 ? 'Overall, you owe' : 'Overall'}</p>
-        <p className={cn('mt-1 text-[40px] leading-none font-bold tracking-[-0.035em] tabular-nums', tone)}>
-          {net === 0 ? 'All settled up' : formatINR(net)}
-        </p>
-      </div>
-      <div className="grid grid-cols-2 divide-x divide-line border-t border-line">
-        <Stat icon="arrowUpRight" tone="text-owe" label="You owe" paise={data.i_owe_paise} groups={data.groups_owe} />
-        <Stat icon="arrowDownLeft" tone="text-owed" label="You get back" paise={data.owed_to_me_paise} groups={data.groups_owed} />
-      </div>
-    </Card>
-  );
-}
-
-function Stat({ icon, tone, label, paise, groups }) {
-  return (
-    <div className="px-5 py-3.5">
-      <p className={cn('flex items-center gap-1 text-[13px] font-medium', paise ? tone : 'text-ink-3')}>
-        <Icon name={icon} size={14} strokeWidth={2.2} />
-        {label}
-      </p>
-      <p className="mt-0.5 text-[19px] font-semibold tracking-[-0.01em] tabular-nums">{formatINR(paise)}</p>
-      <p className="text-[12.5px] text-ink-3">{groups ? `in ${groups} ${groups === 1 ? 'group' : 'groups'}` : 'nothing'}</p>
-    </div>
+    <section aria-label="Overall balance" className="mt-7">
+      <BigTotal paise={net} lead={lead} settledText="All settled up" />
+      {(data.i_owe_paise !== 0 || data.owed_to_me_paise !== 0) && (
+        <div className="mt-5 text-[15px] leading-6 text-ink-2">
+          {data.i_owe_paise !== 0 && (
+            <p>
+              <b className="tabular font-semibold text-owe">{formatINR(data.i_owe_paise)}</b> to pay in {data.groups_owe}{' '}
+              {data.groups_owe === 1 ? 'group' : 'groups'}
+            </p>
+          )}
+          {data.owed_to_me_paise !== 0 && (
+            <p>
+              <b className="tabular font-semibold text-owed">{formatINR(data.owed_to_me_paise)}</b> to get back from {data.groups_owed}{' '}
+              {data.groups_owed === 1 ? 'group' : 'groups'}
+            </p>
+          )}
+        </div>
+      )}
+    </section>
   );
 }

@@ -1,27 +1,26 @@
-import { useMemo, useRef, useState } from 'react';
+import { useId, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router';
 import { api, gql } from '../api';
 import { EXPENSE_FORM } from '../api/queries';
 import { useApi } from '../hooks/useApi';
 import { useTitle } from '../hooks/useTitle';
 import { useToast } from '../context/ToastContext';
-import { CATEGORIES, categoryById, guessCategory, kindById } from '../lib/categories';
+import { CATEGORIES, categoryById, guessCategory } from '../lib/categories';
 import { cn } from '../lib/cn';
 import { dayLabel, todayISO } from '../lib/dates';
 import { tick } from '../lib/feedback';
-import { amountWidth, formatAmountInput, formatINR, MAX_EXPENSE_PAISE, paiseToInput, parseToPaise } from '../lib/money';
+import { formatAmountInput, formatINR, MAX_EXPENSE_PAISE, paiseToInput, parseToPaise } from '../lib/money';
 import { peopleOf } from '../lib/people';
 import { computeSplits } from '../lib/split';
 import { Icon } from '../components/Icon';
-import { Avatar, AvatarStack } from '../components/ui/Avatar';
+import { Avatar } from '../components/ui/Avatar';
 import { Button, IconButton } from '../components/ui/Button';
-import { Card, List, Row } from '../components/ui/Card';
+import { List, Row } from '../components/ui/Card';
 import { FormError, inputClass, TextField } from '../components/ui/Field';
 import { BottomBar, Content, ErrorPage, Page, TopBar } from '../components/ui/Page';
 import { Segmented } from '../components/ui/Segmented';
 import { Sheet } from '../components/ui/Sheet';
 import { Skeleton } from '../components/ui/Skeleton';
-import { Tile } from '../components/ui/Tile';
 
 export default function ExpenseFormPage() {
   const { groupId, expenseId } = useParams();
@@ -184,8 +183,11 @@ function ExpenseForm({ group, existing }) {
   }
 
   const close = () => setSheet(null);
-  const kind = kindById(group.kind);
-  const amountSize = amountText.length > 10 ? 'text-[40px]' : amountText.length > 7 ? 'text-[48px]' : 'text-[60px]';
+  // The figure shrinks a step at a time as it gets longer, so ₹10,00,000.00 still fits on one line.
+  const len = amountText.length;
+  const amountSize = len > 13 ? 'text-[30px]' : len > 10 ? 'text-[36px]' : len > 7 ? 'text-[44px]' : 'text-[52px]';
+  const exactOff = splitType === 'exact' && amount > 0 && exactSum !== amount;
+  const guessed = !categoryPicked && Boolean(description.trim());
 
   return (
     <Page>
@@ -198,22 +200,24 @@ function ExpenseForm({ group, existing }) {
           </IconButton>
         }
       />
-      <Content className="pt-1">
+      <Content>
         <form id="expense-form" onSubmit={save} noValidate>
-          <div className="flex justify-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface py-1 pr-3 pl-1 text-[13.5px] text-ink-2">
-              <Tile icon={kind.icon} tone={kind.tone} size="xs" className="size-6 rounded-full" />
-              {group.name}
-            </span>
-          </div>
+          <p className="pt-2 text-[16px] text-ink-2">{group.name}</p>
 
-          {/* Amount: the biggest thing on the screen, with the number keypad open straight away. */}
-          <div className="mt-7 flex flex-col items-center">
-            <label htmlFor="amount" className="sr-only">
-              Amount in rupees
+          {/* Amount: the biggest thing on the screen, written in ballpoint blue on a line. The number keypad opens straight away. */}
+          <div className="mt-5">
+            <label htmlFor="amount" className="block text-[15px] font-semibold text-ink">
+              Amount<span className="sr-only"> in rupees</span>
             </label>
-            <div className="flex items-baseline justify-center">
-              <span className={cn('mr-1 text-[38px] font-semibold transition-colors', amount ? 'text-ink' : 'text-ink-3')}>₹</span>
+            <div
+              className={cn(
+                'mt-1 flex items-baseline gap-1.5 border-b-2 border-line-strong pt-1 pb-1.5 font-display leading-[1.3] focus-within:border-accent-text',
+                amountSize,
+              )}
+            >
+              <span aria-hidden="true" className={amount ? 'text-accent-text' : 'text-ink-3'}>
+                ₹
+              </span>
               <input
                 id="amount"
                 inputMode="decimal"
@@ -222,87 +226,88 @@ function ExpenseForm({ group, existing }) {
                 placeholder="0"
                 value={amountText}
                 onChange={(e) => setAmountText(formatAmountInput(e.target.value))}
-                style={{ width: amountWidth(amountText) }}
-                className={cn(
-                  'peer max-w-[80vw] bg-transparent text-center font-bold tracking-[-0.04em] tabular-nums caret-accent outline-none placeholder:text-ink-3/50 focus-visible:outline-none',
-                  amountSize,
-                )}
+                className="tabular min-w-0 flex-1 bg-transparent text-accent-text caret-accent-text outline-none placeholder:text-ink-3 focus-visible:outline-none"
               />
             </div>
-            <span className="mt-1 h-[3px] w-20 rounded-full bg-line transition-colors peer-focus:bg-accent" aria-hidden="true" />
           </div>
 
-          {/* Description; the category icon is guessed from the words. */}
-          <Card className="mt-7 flex items-center gap-2 p-1.5 has-[input:focus]:border-accent has-[input:focus]:ring-4 has-[input:focus]:ring-accent/15">
-            <button
-              type="button"
-              onClick={() => setSheet('category')}
-              aria-label={`Category: ${cat.label}. Change category`}
-              className="rounded-xl transition-transform active:scale-95"
-            >
-              <Tile icon={cat.icon} tone={cat.tone} />
-            </button>
-            <input
-              aria-label="Description"
-              placeholder="What was it for?"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              maxLength={60}
-              enterKeyHint="done"
-              autoComplete="off"
-              className="h-11 min-w-0 flex-1 bg-transparent px-1 text-[17px] outline-none placeholder:text-ink-3 focus-visible:outline-none"
-            />
-          </Card>
-          <p className="mt-1.5 px-2 text-[13px] text-ink-3">
-            {description.trim() ? (
-              <>
-                Category: <span className="font-medium text-ink-2">{cat.label}</span>
-                {!categoryPicked && ' (guessed, tap the icon to change)'}
-              </>
-            ) : (
-              'For example: Wi-Fi recharge, dinner, cab to the station'
-            )}
-          </p>
+          <TextField
+            className="mt-6"
+            label="Description"
+            placeholder="What was it for?"
+            hint="For example: Wi-Fi recharge, dinner, cab to the station"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            maxLength={60}
+            enterKeyHint="done"
+            autoComplete="off"
+          />
 
-          {/* "Paid by You and split equally": every bold word can be tapped. */}
-          <Card className="mt-4 p-4">
-            <p className="flex flex-wrap items-center gap-x-1.5 gap-y-2 text-[16.5px] text-ink-2">
-              Paid by
-              <Chip onClick={() => setSheet('payer')} label={`Paid by ${people.name(paidBy)}. Change`}>
-                <Avatar user={people.get(paidBy)} size="xs" />
-                {people.first(paidBy)}
-              </Chip>
-              and split
-              <Chip onClick={() => setSheet('split')} label={`Split ${SPLIT_WORD[splitType]}. Change`}>
-                {SPLIT_WORD[splitType]}
-              </Chip>
+          {/* Category: guessed from the description, shown as words. Tapping one fixes it. */}
+          <div className="mt-6" role="group" aria-labelledby="category-label">
+            <p id="category-label" className="text-[15px] font-semibold text-ink">
+              Category
+              {guessed && <span className="font-normal text-ink-2"> · guessed, tap to change</span>}
             </p>
-            <button
-              type="button"
-              onClick={() => setSheet('split')}
-              className="mt-3.5 flex w-full items-center gap-2.5 border-t border-line pt-3.5 text-left"
-            >
-              <AvatarStack users={participants} size="xs" max={6} />
-              <span className={cn('min-w-0 flex-1 truncate text-[14.5px]', splitType === 'exact' && amount && exactSum !== amount ? 'text-owe' : 'text-ink-2')}>
-                {summary()}
-              </span>
-              <Icon name="chevronRight" size={17} className="text-ink-3" />
-            </button>
-          </Card>
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            <DateChip value={date} onChange={setDate} />
-            {!noteOpen && (
-              <Chip onClick={() => setNoteOpen(true)} plain>
-                <Icon name="note" size={16} />
-                Add note
-              </Chip>
-            )}
+            <div className="mt-2 flex flex-wrap gap-2">
+              {CATEGORIES.map((c) => {
+                // Nothing is shown as chosen until the description suggests a category or the person taps one.
+                // (If they never do, the expense is still saved as "Other".)
+                const on = cat.id === c.id && (categoryPicked || cat.id !== 'other');
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => {
+                      setCategory(c.id);
+                      setCategoryPicked(true);
+                    }}
+                    className={cn(
+                      'h-10 rounded-lg border-[1.5px] px-3 pt-0.5 text-[15px] font-semibold',
+                      on ? 'border-accent bg-accent text-accent-ink' : 'border-line-strong bg-surface text-ink hover:bg-surface-2 active:bg-sunken',
+                    )}
+                  >
+                    {c.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          {noteOpen && (
+
+          {/* Who paid and how it is split, written out as two lines. Each opens its own sheet. */}
+          <List className="mt-8">
+            <Row
+              onClick={() => setSheet('payer')}
+              aria-label={`Paid by ${people.name(paidBy)}. Change`}
+              title={
+                <>
+                  <span className="font-normal text-ink-2">Paid by </span>
+                  {people.name(paidBy)}
+                </>
+              }
+              trailing={<Avatar user={people.get(paidBy)} size="sm" me={paidBy === meId} />}
+              chevron
+            />
+            <Row
+              onClick={() => setSheet('split')}
+              title={
+                <>
+                  <span className="font-normal text-ink-2">Split </span>
+                  {SPLIT_WORD[splitType]}
+                </>
+              }
+              subtitle={<span className={cn('tabular', exactOff && 'font-medium text-owe')}>{summary()}</span>}
+              chevron
+            />
+          </List>
+
+          <DateField className="mt-7" value={date} onChange={setDate} />
+
+          {noteOpen ? (
             <TextField
               as="textarea"
-              className="mt-4"
+              className="mt-6"
               label="Note"
               placeholder="Anything the group should know"
               value={note}
@@ -310,28 +315,34 @@ function ExpenseForm({ group, existing }) {
               maxLength={200}
               autoFocus={!init.note}
             />
+          ) : (
+            <Button variant="quiet" size="sm" className="mt-4 -ml-1 px-1.5" icon={<Icon name="plus" size={16} />} onClick={() => setNoteOpen(true)}>
+              Add note
+            </Button>
           )}
-          <div className="mt-4">
-            <FormError>{error}</FormError>
-          </div>
+
+          {error && (
+            <div className="mt-6">
+              <FormError>{error}</FormError>
+            </div>
+          )}
         </form>
       </Content>
 
       <BottomBar>
-        {problem ? (
-          <div role="status" aria-live="polite" className="flex h-[52px] items-center justify-center rounded-[14px] bg-sunken px-4 text-[16px] font-medium text-ink-2">
+        {problem && (
+          <p role="status" aria-live="polite" className={cn('truncate pb-2 text-center text-[15px]', exactOff ? 'font-semibold text-owe' : 'text-ink-2')}>
             {problem}
-          </div>
-        ) : (
-          <Button type="submit" form="expense-form" size="lg" full loading={busy}>
-            {editing ? 'Save changes' : `Add ${formatINR(amount)}`}
-          </Button>
+          </p>
         )}
+        <Button type="submit" form="expense-form" size="lg" full loading={busy} disabled={Boolean(problem)}>
+          {editing ? 'Save changes' : 'Save expense'}
+        </Button>
       </BottomBar>
 
       {/* Who paid */}
       <Sheet open={sheet === 'payer'} onClose={close} title="Who paid?">
-        <List role="radiogroup" aria-label="Who paid" className="bg-surface/70">
+        <List role="radiogroup" aria-label="Who paid">
           {members.map((m) => (
             <Row
               key={m.id}
@@ -341,7 +352,7 @@ function ExpenseForm({ group, existing }) {
                 setPaidBy(m.id);
                 close();
               }}
-              leading={<Avatar user={m} />}
+              leading={<Avatar user={m} me={m.id === meId} />}
               title={people.name(m.id)}
               subtitle={m.joined ? undefined : 'Not joined yet'}
               trailing={paidBy === m.id ? <Icon name="check" size={20} strokeWidth={2.4} className="text-accent-text" /> : null}
@@ -374,30 +385,31 @@ function ExpenseForm({ group, existing }) {
           value={splitType}
           onChange={setSplitType}
         />
-        <p className="mt-3 px-1 text-[14px] leading-snug text-ink-2">
+        <p className="mt-3 text-[15px] leading-snug text-ink-2">
           {splitType === 'equal' && 'Everyone ticked pays the same. If it does not divide evenly, the extra paise go to one person.'}
           {splitType === 'exact' && (amount ? `Type what each person owes. It has to add up to ${formatINR(amount)}.` : 'Type what each person owes.')}
           {splitType === 'shares' && 'Someone with 2 shares pays twice as much as someone with 1. Useful for rent by room size.'}
         </p>
         {splitType === 'equal' && (
-          <div className="mt-3 flex justify-end">
-            <button
-              type="button"
-              className="rounded-lg px-1 text-[14px] font-semibold text-accent-text"
+          <div className="mt-1 flex justify-end">
+            <Button
+              variant="quiet"
+              size="sm"
+              className="-mr-1 px-1.5"
               onClick={() => setIncluded(included.size === members.length ? new Set() : new Set(members.map((m) => m.id)))}
             >
               {included.size === members.length ? 'Clear all' : 'Select everyone'}
-            </button>
+            </Button>
           </div>
         )}
-        <List className="mt-2 bg-surface/70">
+        <List className={splitType === 'equal' ? 'mt-1' : 'mt-4'}>
           {members.map((m) => {
             const name = people.name(m.id);
             if (splitType === 'equal') {
               const on = included.has(m.id);
               return (
                 <li key={m.id}>
-                  <label className="flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-2">
+                  <label className="flex min-h-14 cursor-pointer items-center gap-3 px-1 py-3 hover:bg-surface-2">
                     <input
                       type="checkbox"
                       className="peer sr-only"
@@ -411,33 +423,39 @@ function ExpenseForm({ group, existing }) {
                     <span
                       aria-hidden="true"
                       className={cn(
-                        'grid size-[22px] shrink-0 place-items-center rounded-[7px] border-2 transition-colors peer-focus-visible:ring-4 peer-focus-visible:ring-accent/25',
-                        on ? 'border-accent bg-accent text-white' : 'border-line-strong',
+                        'grid size-[22px] shrink-0 place-items-center rounded-[5px] border-2 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent-text',
+                        on ? 'border-accent bg-accent text-accent-ink' : 'border-line-strong bg-surface',
                       )}
                     >
                       {on && <Icon name="check" size={14} strokeWidth={3} />}
                     </span>
-                    <Avatar user={m} size="sm" />
-                    <span className="min-w-0 flex-1 truncate text-[16px]">{name}</span>
-                    <span className={cn('text-[15px] tabular-nums', on ? 'font-semibold' : 'text-ink-3')}>{on && amount ? formatINR(shareOf[m.id] || 0) : '—'}</span>
+                    <Avatar user={m} size="sm" me={m.id === meId} />
+                    <span className={cn('min-w-0 flex-1 truncate text-[16px]', on ? 'font-medium text-ink' : 'text-ink-2')}>{name}</span>
+                    {on ? (
+                      amount > 0 && <span className="tabular text-[16px] font-semibold">{formatINR(shareOf[m.id] || 0)}</span>
+                    ) : (
+                      <span className="text-[14px] text-ink-2">not included</span>
+                    )}
                   </label>
                 </li>
               );
             }
             if (splitType === 'exact') {
               return (
-                <li key={m.id} className="flex items-center gap-3 px-4 py-2.5">
-                  <Avatar user={m} size="sm" />
-                  <span className="min-w-0 flex-1 truncate text-[16px]">{name}</span>
-                  <span className="relative w-32">
-                    <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-3">₹</span>
+                <li key={m.id} className="flex items-center gap-3 px-1 py-2.5">
+                  <Avatar user={m} size="sm" me={m.id === meId} />
+                  <span className="min-w-0 flex-1 truncate text-[16px] font-medium">{name}</span>
+                  <span className="relative w-32 shrink-0">
+                    <span aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 pt-0.5 text-ink-2">
+                      ₹
+                    </span>
                     <input
                       inputMode="decimal"
                       aria-label={`Amount for ${name}`}
                       placeholder="0"
                       value={exact[m.id] || ''}
                       onChange={(e) => setExact({ ...exact, [m.id]: formatAmountInput(e.target.value) })}
-                      className={cn(inputClass, 'h-10 pr-3 pl-7 text-right tabular-nums')}
+                      className={cn(inputClass, 'tabular h-11 pr-3 pl-7 text-right')}
                     />
                   </span>
                 </li>
@@ -445,15 +463,15 @@ function ExpenseForm({ group, existing }) {
             }
             const s = shares[m.id] || 0;
             return (
-              <li key={m.id} className="flex items-center gap-3 px-4 py-2.5">
-                <Avatar user={m} size="sm" />
+              <li key={m.id} className="flex items-center gap-3 px-1 py-2.5">
+                <Avatar user={m} size="sm" me={m.id === meId} />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[16px]">{name}</span>
-                  <span className="block text-[13px] text-ink-3 tabular-nums">{s && amount ? formatINR(shareOf[m.id] || 0) : 'not included'}</span>
+                  <span className="block truncate text-[16px] font-medium">{name}</span>
+                  <span className="tabular block text-[14px] text-ink-2">{s && amount ? formatINR(shareOf[m.id] || 0) : 'not included'}</span>
                 </span>
-                <span className="flex items-center rounded-xl border border-line bg-surface">
+                <span className="flex shrink-0 items-center rounded-[10px] border-[1.5px] border-line-strong">
                   <StepButton label={`Fewer shares for ${name}`} disabled={s === 0} onClick={() => setShares({ ...shares, [m.id]: s - 1 })} icon="minus" />
-                  <span className="w-8 text-center text-[16px] font-semibold tabular-nums" aria-live="polite" aria-label={`${s} shares`}>
+                  <span className="tabular w-8 pt-0.5 text-center text-[16px] font-semibold" aria-live="polite" aria-label={`${s} shares`}>
                     {s}
                   </span>
                   <StepButton label={`More shares for ${name}`} disabled={s >= 99} onClick={() => setShares({ ...shares, [m.id]: s + 1 })} icon="plus" />
@@ -463,83 +481,52 @@ function ExpenseForm({ group, existing }) {
           })}
         </List>
       </Sheet>
-
-      {/* Category */}
-      <Sheet open={sheet === 'category'} onClose={close} title="Category">
-        <div className="grid grid-cols-3 gap-2.5">
-          {CATEGORIES.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              aria-pressed={cat.id === c.id}
-              onClick={() => {
-                setCategory(c.id);
-                setCategoryPicked(true);
-                close();
-              }}
-              className={cn(
-                'flex flex-col items-center gap-2 rounded-2xl border bg-surface/70 px-2 py-3.5 text-[14px] font-medium transition-[transform,border-color] active:scale-95',
-                cat.id === c.id ? 'border-accent shadow-[0_0_0_1px_var(--accent)]' : 'border-line hover:border-line-strong',
-              )}
-            >
-              <Tile icon={c.icon} tone={c.tone} />
-              {c.label}
-            </button>
-          ))}
-        </div>
-      </Sheet>
     </Page>
   );
 }
 
-function Chip({ children, onClick, label, plain }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className={cn(
-        'inline-flex h-9 items-center gap-1.5 rounded-[10px] border px-2.5 transition-[transform,border-color,background-color] duration-150 active:scale-[0.97]',
-        plain
-          ? 'border-line bg-surface text-[14.5px] font-medium text-ink-2 hover:text-ink'
-          : 'border-line-strong bg-surface-2 text-[16px] font-semibold text-ink hover:border-accent',
-      )}
-    >
-      {children}
-      {!plain && <Icon name="chevronDown" size={15} strokeWidth={2.2} className="text-ink-3" />}
-    </button>
-  );
-}
-
-/** A visible, bordered date chip (Splitwise hides the date as a tiny icon; people miss it). */
-function DateChip({ value, onChange }) {
+/**
+ * Looks like any other text field, but shows the date in words ("Today", "Mon, 2 Nov").
+ * A transparent native date input sits on top, so tapping anywhere opens the phone's own date picker.
+ */
+function DateField({ value, onChange, className }) {
   const ref = useRef(null);
+  const id = useId();
   return (
-    <span className="relative inline-flex rounded-[10px] has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-accent/25">
-      <span
-        aria-hidden="true"
-        className="inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-line bg-surface px-2.5 text-[14.5px] font-medium text-ink-2"
-      >
-        <Icon name="calendar" size={16} />
-        {dayLabel(value)}
-      </span>
-      <input
-        ref={ref}
-        type="date"
-        aria-label={`Date: ${dayLabel(value)}. Change date`}
-        value={value}
-        max={todayISO()}
-        onChange={(e) => e.target.value && onChange(e.target.value)}
-        onClick={() => {
-          try {
-            ref.current?.showPicker?.();
-          } catch {
-            /* older browsers open it on their own */
-          }
-        }}
-        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-      />
-    </span>
+    <div className={cn('space-y-1.5', className)}>
+      <label htmlFor={id} className="block text-[15px] font-semibold text-ink">
+        Date
+      </label>
+      <div className="relative">
+        <input
+          ref={ref}
+          id={id}
+          type="date"
+          aria-label={`Date: ${dayLabel(value)}. Change date`}
+          value={value}
+          max={todayISO()}
+          onChange={(e) => e.target.value && onChange(e.target.value)}
+          onClick={() => {
+            try {
+              ref.current?.showPicker?.();
+            } catch {
+              /* older browsers open it on their own */
+            }
+          }}
+          className="peer absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+        />
+        <span
+          aria-hidden="true"
+          className={cn(
+            inputClass,
+            'flex items-center justify-between peer-hover:bg-surface-2 peer-focus:border-accent-text peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent-text',
+          )}
+        >
+          {dayLabel(value)}
+          <Icon name="calendar" size={18} className="-mt-0.5 text-ink-2" />
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -550,26 +537,27 @@ function StepButton({ label, onClick, disabled, icon }) {
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      className="grid size-9 place-items-center rounded-[10px] text-ink-2 transition-[transform,background-color] hover:bg-sunken active:scale-90 disabled:opacity-35"
+      className="grid size-11 place-items-center rounded-[9px] text-ink-2 hover:bg-sunken hover:text-ink active:bg-sunken disabled:opacity-35"
     >
       <Icon name={icon} size={17} strokeWidth={2.2} />
     </button>
   );
 }
 
+/** The running check under the split list: red with the gap when the amounts don't add up, green when they do. */
 function SplitStatus({ type, amount, exactSum, totalShares, count, total }) {
   let text = `${count} of ${total} ${total === 1 ? 'person' : 'people'} included`;
-  let tone = 'text-ink-2';
-  let icon = 'users';
+  let color = 'font-medium text-ink-2';
+  let addsUp = false;
   if (type === 'exact' && amount) {
-    if (exactSum === amount) [text, tone, icon] = [`Adds up to ${formatINR(amount)}`, 'text-owed', 'checkCircle'];
-    else if (exactSum < amount) [text, tone, icon] = [`${formatINR(amount - exactSum)} left to assign`, 'text-owe', 'info'];
-    else [text, tone, icon] = [`${formatINR(exactSum - amount)} more than the total`, 'text-owe', 'info'];
+    if (exactSum === amount) [text, color, addsUp] = [`Adds up to ${formatINR(amount)}`, 'font-semibold text-owed', true];
+    else if (exactSum < amount) [text, color] = [`${formatINR(amount - exactSum)} left to assign`, 'font-semibold text-owe'];
+    else [text, color] = [`${formatINR(exactSum - amount)} more than the total`, 'font-semibold text-owe'];
   }
   if (type === 'shares') text = `${totalShares} ${totalShares === 1 ? 'share' : 'shares'} between ${count} ${count === 1 ? 'person' : 'people'}`;
   return (
-    <p role="status" aria-live="polite" className={cn('flex items-center justify-center gap-1.5 text-[14.5px] font-medium', tone)}>
-      <Icon name={icon} size={16} />
+    <p role="status" aria-live="polite" className={cn('tabular flex items-center justify-center gap-1.5 text-[15px]', color)}>
+      {addsUp && <Icon name="check" size={16} strokeWidth={2.4} className="-mt-0.5" />}
       {text}
     </p>
   );
@@ -580,10 +568,17 @@ function FormSkeleton({ editing }) {
     <Page>
       <TopBar alwaysShowTitle title={editing ? 'Edit expense' : 'Add expense'} />
       <Content>
-        <div className="flex flex-col items-center gap-6 pt-10" aria-busy="true">
-          <Skeleton className="h-14 w-40" />
-          <Skeleton className="h-14 w-full rounded-2xl" />
-          <Skeleton className="h-28 w-full rounded-2xl" />
+        <div className="pt-3" aria-busy="true">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="mt-7 h-4 w-16" />
+          <Skeleton className="mt-3 h-14 w-48" />
+          <Skeleton className="mt-8 h-4 w-24" />
+          <Skeleton className="mt-2.5 h-12 w-full rounded-[10px]" />
+          <div className="mt-8 flex flex-wrap gap-2">
+            {['w-16', 'w-24', 'w-14', 'w-14', 'w-[72px]', 'w-14'].map((w, i) => (
+              <Skeleton key={i} className={cn('h-10 rounded-lg', w)} />
+            ))}
+          </div>
         </div>
       </Content>
     </Page>

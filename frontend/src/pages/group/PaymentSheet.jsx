@@ -4,7 +4,6 @@ import { useToast } from '../../context/ToastContext';
 import { formatINR } from '../../lib/money';
 import { timeAgo } from '../../lib/dates';
 import { Icon } from '../../components/Icon';
-import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
 import { Sheet } from '../../components/ui/Sheet';
 
@@ -36,32 +35,22 @@ export function PaymentSheet({ payment, people, meId, onClose }) {
   }
 
   return (
-    <Sheet open={!!payment} onClose={onClose} title="Payment">
+    <Sheet
+      open={!!payment}
+      onClose={onClose}
+      title={p ? `${people.first(p.from_member_id)} paid ${people.first(p.to_member_id, true)}` : 'Payment'}
+    >
       {p && (
         <div className="pb-1">
-          <div className="flex items-center justify-center gap-3 py-4">
-            <Person user={people.get(p.from_member_id)} label={people.first(p.from_member_id)} />
-            <Icon name="arrowRight" size={22} className="mb-6 text-ink-3" />
-            <Person user={people.get(p.to_member_id)} label={people.first(p.to_member_id)} />
-          </div>
-          <p className="text-center text-[34px] font-bold tracking-[-0.03em] tabular-nums">{formatINR(p.amount_paise)}</p>
-          <p className="mt-1 text-center text-[14px] text-ink-2">
+          <p className="tabular font-display text-[44px] leading-[1.15] text-accent-text">{formatINR(p.amount_paise)}</p>
+          <p className="mt-2 text-[15px] leading-6 text-ink-2">
             {p.method === 'cash' ? 'Cash or other' : 'UPI'} · marked as paid {timeAgo(p.created_at)}
           </p>
-          <Button variant="danger" full className="mt-6" loading={busy} onClick={remove} icon={<Icon name="trash" size={18} />}>
+          <Button variant="danger" full className="mt-7" loading={busy} onClick={remove} icon={<Icon name="trash" size={18} />}>
             Remove this payment
           </Button>
         </div>
       )}
     </Sheet>
-  );
-}
-
-function Person({ user, label }) {
-  return (
-    <span className="flex w-20 flex-col items-center gap-1.5">
-      <Avatar user={user} size="lg" />
-      <span className="max-w-full truncate text-[14px] font-medium">{label}</span>
-    </span>
   );
 }

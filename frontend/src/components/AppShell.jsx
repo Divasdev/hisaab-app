@@ -6,14 +6,12 @@ import { useApi } from '../hooks/useApi';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/cn';
-import { kindById } from '../lib/categories';
 import { Icon } from './Icon';
 import { Avatar } from './ui/Avatar';
 import { Button } from './ui/Button';
 import { Wordmark } from './ui/Brand';
 import { BalanceInline } from './ui/Money';
 import { Skeleton } from './ui/Skeleton';
-import { Tile } from './ui/Tile';
 
 /** Logged-in layout. Phones: one column. Laptops (lg): groups sidebar on the left, screen on the right. */
 export function AppShell() {
@@ -27,7 +25,7 @@ export function AppShell() {
     <div className="lg:grid lg:grid-cols-[300px_minmax(0,1fr)]">
       <a
         href="#main"
-        className="sr-only z-70 rounded-xl bg-accent px-4 py-2 font-semibold text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+        className="sr-only z-70 rounded-lg bg-accent px-4 py-2 font-semibold text-accent-ink focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
       >
         Skip to content
       </a>
@@ -40,50 +38,45 @@ export function AppShell() {
 }
 
 const navItem = ({ isActive }) =>
-  cn(
-    'flex items-center gap-3 rounded-xl px-2.5 py-2 text-[15px] transition-[background-color,color,box-shadow] duration-150',
-    isActive ? 'bg-surface font-semibold text-ink shadow-lift ring-1 ring-line' : 'text-ink-2 hover:bg-sunken hover:text-ink',
-  );
+  cn('flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-[16px] hover:bg-sunken', isActive ? 'font-semibold text-ink' : 'text-ink-2 hover:text-ink');
 
+/** Laptop only: the groups down the left, like an index on the first page of a notebook. */
 function Sidebar() {
   const { user } = useAuth();
   const groups = useApi(() => gql(SIDEBAR_GROUPS), []);
   return (
-    <aside className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-surface-2/70 lg:flex">
-      <div className="px-5 pt-5 pb-5">
-        <Link to="/" className="inline-flex rounded-xl">
-          <Wordmark />
+    <aside className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-surface-2 lg:flex">
+      <div className="px-6 pt-6 pb-6">
+        <Link to="/" className="inline-flex rounded-md pt-1">
+          <Wordmark className="text-[26px]" />
         </Link>
       </div>
       <nav aria-label="Main" className="flex-1 overflow-y-auto px-3 pb-4">
         <NavLink to="/" end className={navItem}>
-          <span className="grid size-8 place-items-center rounded-[10px] bg-sunken text-ink-2">
-            <Icon name="wallet" size={17} />
-          </span>
-          Overview
+          <span className="pt-0.5">Overview</span>
         </NavLink>
-        <div className="flex items-center justify-between px-2.5 pt-6 pb-2">
-          <span className="text-[13px] font-semibold text-ink-3">Groups</span>
-          <Button variant="tinted" size="sm" to="/groups/new" icon={<Icon name="plus" size={16} strokeWidth={2.2} />} className="-mr-1 h-8 px-2.5 text-[13.5px]">
+        <div className="flex items-center justify-between px-3 pt-7 pb-2">
+          <span className="pt-0.5 text-[14px] font-semibold text-ink-2">Groups</span>
+          <Button variant="secondary" size="sm" to="/groups/new" icon={<Icon name="plus" size={14} />} className="-mr-1 h-9 px-3 text-[14px]">
             New group
           </Button>
         </div>
         <ul className="space-y-0.5">
           {!groups.data &&
             [0, 1, 2].map((i) => (
-              <li key={i} className="flex items-center gap-3 px-2.5 py-2">
-                <Skeleton className="size-8 rounded-[10px]" />
-                <Skeleton className="h-3.5 flex-1" />
+              <li key={i} className="flex items-center gap-3 px-3 py-3">
+                <Skeleton className="h-4 flex-1" />
+                <Skeleton className="h-3 w-14" />
               </li>
             ))}
           {groups.data?.groups.map((g) => {
-            const kind = kindById(g.kind);
+            const spent = g.total_spent_paise > 0;
+            const settled = !g.my_balance_paise && spent;
             return (
               <li key={g.id}>
                 <NavLink to={`/groups/${g.id}`} className={navItem}>
-                  <Tile icon={kind.icon} tone={kind.tone} size="xs" className="size-8 rounded-[10px]" />
-                  <span className="min-w-0 flex-1 truncate">{g.name}</span>
-                  <BalanceInline paise={g.my_balance_paise} />
+                  <span className={cn('min-w-0 flex-1 truncate pt-0.5', settled && 'struck')}>{g.name}</span>
+                  {(g.my_balance_paise || spent) && <BalanceInline paise={g.my_balance_paise} className="pt-0.5" />}
                 </NavLink>
               </li>
             );
@@ -92,10 +85,10 @@ function Sidebar() {
       </nav>
       <div className="border-t border-line p-3">
         <NavLink to="/account" className={navItem}>
-          <Avatar user={user} size="sm" />
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-[15px] font-semibold text-ink">{user?.name}</span>
-            <span className="block truncate text-[12.5px] font-normal text-ink-3">Account and settings</span>
+          <Avatar user={user} size="sm" me />
+          <span className="min-w-0 flex-1 pt-0.5">
+            <span className="block truncate text-[15px] leading-5 font-semibold text-ink">{user?.name}</span>
+            <span className="block truncate text-[13px] leading-5 font-normal text-ink-2">Account and settings</span>
           </span>
         </NavLink>
       </div>

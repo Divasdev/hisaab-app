@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router';
+import { useParams, useSearchParams } from 'react-router';
 import { gql } from '../../api';
 import { GROUP_SCREEN } from '../../api/queries';
 import { useApi } from '../../hooks/useApi';
@@ -11,13 +11,12 @@ import { formatINR } from '../../lib/money';
 import { listNames, peopleOf } from '../../lib/people';
 import { Icon } from '../../components/Icon';
 import { InviteCard } from '../../components/InviteCard';
-import { AvatarStack } from '../../components/ui/Avatar';
-import { Button, IconButton } from '../../components/ui/Button';
+import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import { BigTotal } from '../../components/ui/Money';
 import { BottomBar, Content, ErrorPage, LargeTitle, Page, TopBar } from '../../components/ui/Page';
 import { Segmented } from '../../components/ui/Segmented';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { Tile } from '../../components/ui/Tile';
 import { ExpensesTab } from './ExpensesTab';
 import { BalancesTab } from './BalancesTab';
 import { ActivityTab } from './ActivityTab';
@@ -45,60 +44,71 @@ export default function GroupPage() {
   const kind = kindById(g?.kind);
   return (
     <Page>
-      <TopBar
-        title={g?.name}
-        back="/"
-        backLabel="Groups"
-        right={
-          <IconButton label="Members and settings" to={`/groups/${groupId}/members`}>
-            <Icon name="users" size={21} />
-          </IconButton>
-        }
-      />
+      <TopBar title={g?.name} back="/" backLabel="Groups" />
       <Content>
         {!g ? (
           <HeaderSkeleton />
         ) : (
           <>
-            <div className="flex items-start gap-3.5 px-1">
-              <Tile icon={kind.icon} tone={kind.tone} size="lg" className="mt-0.5" />
-              <div className="min-w-0 flex-1">
-                <LargeTitle className="px-0 pt-0 text-[28px]">{g.name}</LargeTitle>
-                <Link
-                  to={`/groups/${groupId}/members`}
-                  className="mt-1.5 inline-flex items-center gap-2 rounded-lg text-[14px] text-ink-2 hover:text-ink"
-                >
-                  <AvatarStack users={g.members} max={5} size="xs" />
-                  {g.members.length} {g.members.length === 1 ? 'member' : 'members'}
-                  <Icon name="chevronRight" size={15} />
-                </Link>
-              </div>
-            </div>
-            <SummaryCard g={g} />
+            <LargeTitle>{g.name}</LargeTitle>
+            <p className="mt-1 text-[16px] leading-[22px] text-ink-2">
+              {kind.label} · {g.members.length} {g.members.length === 1 ? 'member' : 'members'}
+            </p>
+            <Summary g={g} />
             <JoinNudge g={g} />
           </>
         )}
 
         <Segmented
-          className="mt-6"
+          className="mt-8"
           label="Group sections"
           idPrefix="group"
           options={TABS}
           value={tab}
           onChange={(t) => setParams(t === 'expenses' ? {} : { tab: t }, { replace: true })}
         />
-        <div id="group-panel" role="tabpanel" aria-labelledby={`group-tab-${tab}`} className="mt-1">
+        <div id="group-panel" role="tabpanel" aria-labelledby={`group-tab-${tab}`}>
           {tab === 'expenses' && <ExpensesTab groupId={groupId} expenses={g?.expenses} payments={g?.settlements} people={people} meId={meId} />}
           {tab === 'balances' && g && <BalancesTab group={g} people={people} meId={meId} />}
           {tab === 'activity' && <ActivityTab groupId={groupId} meId={user.id} />}
         </div>
       </Content>
-      <BottomBar>
-        <Button size="lg" full to={`/groups/${groupId}/add`} icon={<Icon name="plus" size={21} strokeWidth={2.2} />}>
+      <BottomBar desktop={false}>
+        <Button size="lg" full to={`/groups/${groupId}/add`} icon={<Icon name="plus" size={18} />}>
           Add expense
         </Button>
       </BottomBar>
     </Page>
+  );
+}
+
+/** Your balance in this group, written as the total at the bottom of the page, with the group's actions under it. */
+function Summary({ g }) {
+  const b = g.my_balance_paise;
+  const anyoneOwes = g.members.some((m) => m.balance_paise !== 0);
+  const lead = b > 0 ? 'You get back in this group' : b < 0 ? 'You owe in this group' : 'Your balance in this group';
+  return (
+    <section aria-label="Your balance in this group" className="mt-7">
+      {/* Settled is words, not a figure: the smaller size keeps it on one line on small phones. */}
+      <BigTotal paise={b} lead={lead} settledText="All settled up" size={b ? 'lg' : 'md'} />
+      <p className="mt-5 text-[15px] leading-6 text-ink-2">
+        Group spent <b className="tabular font-semibold text-ink">{formatINR(g.total_spent_paise)}</b> in total
+      </p>
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        {/* On laptops the main action sits here instead of in a bar stretched across the bottom. */}
+        <Button size="sm" to={`/groups/${g.id}/add`} icon={<Icon name="plus" size={15} />} className="max-lg:hidden">
+          Add expense
+        </Button>
+        {anyoneOwes && (
+          <Button variant="secondary" size="sm" to={`/groups/${g.id}/settle`}>
+            Settle up
+          </Button>
+        )}
+        <Button variant="quiet" size="sm" to={`/groups/${g.id}/members`} className={cn(!anyoneOwes && '-ml-3.5 lg:ml-0')}>
+          Members and invite
+        </Button>
+      </div>
+    </section>
   );
 }
 
@@ -108,9 +118,9 @@ function JoinNudge({ g }) {
   const alone = g.members.length === 1;
   if (alone) {
     return (
-      <div className="mt-3 space-y-2">
+      <div className="mt-6">
         <InviteCard groupId={g.id} groupName={g.name} isAdmin={g.my_role === 'admin'} headline="Invite your group" />
-        <Button variant="ghost" full to={`/groups/${g.id}/members?add=1`} icon={<Icon name="userPlus" size={18} />} className="text-accent-text">
+        <Button variant="quiet" size="sm" to={`/groups/${g.id}/members?add=1`} className="mt-2 -ml-3.5">
           Or add people by name
         </Button>
       </div>
@@ -118,42 +128,14 @@ function JoinNudge({ g }) {
   }
   if (!waiting.length) return null;
   return (
-    <Card className="mt-3 flex items-center gap-3 py-3.5 pr-3.5 pl-4">
-      <AvatarStack users={waiting} size="sm" max={3} />
-      <div className="min-w-0 flex-1">
-        <p className="text-[15px] leading-snug font-medium">
-          {listNames(waiting)} {waiting.length === 1 ? "hasn't" : "haven't"} joined yet
-        </p>
-        <p className="text-[13.5px] leading-snug text-ink-2">You can already split with them. Invite them so they see it too.</p>
-      </div>
-      <Button variant="tinted" size="sm" to={`/groups/${g.id}/members`}>
+    <Card className="mt-6">
+      <p className="text-[16px] leading-snug font-semibold">
+        {listNames(waiting)} {waiting.length === 1 ? "hasn't" : "haven't"} joined yet
+      </p>
+      <p className="mt-1 text-[15px] leading-snug text-ink-2">You can already split with them. Invite them so they see it too.</p>
+      <Button variant="secondary" size="sm" to={`/groups/${g.id}/members`} className="mt-3.5">
         Invite
       </Button>
-    </Card>
-  );
-}
-
-function SummaryCard({ g }) {
-  const b = g.my_balance_paise;
-  const tone = b > 0 ? 'text-owed' : b < 0 ? 'text-owe' : 'text-ink';
-  const anyoneOwes = g.members.some((m) => m.balance_paise !== 0);
-  return (
-    <Card className="mt-5 flex items-center gap-4 py-4 pr-4 pl-5">
-      <div className="min-w-0 flex-1">
-        <p className={cn('flex items-center gap-1 text-[14px] font-medium', b ? tone : 'text-ink-2')}>
-          {b !== 0 && <Icon name={b > 0 ? 'arrowDownLeft' : 'arrowUpRight'} size={15} strokeWidth={2.2} />}
-          {b > 0 ? 'You get back' : b < 0 ? 'You owe' : 'Your balance'}
-        </p>
-        <p className={cn('mt-0.5 text-[30px] leading-tight font-bold tracking-[-0.03em] tabular-nums', tone)}>
-          {b === 0 ? 'Settled up' : formatINR(b)}
-        </p>
-        <p className="mt-0.5 text-[13.5px] text-ink-3">Group spent {formatINR(g.total_spent_paise)} in total</p>
-      </div>
-      {anyoneOwes && (
-        <Button variant="tinted" to={`/groups/${g.id}/settle`}>
-          Settle up
-        </Button>
-      )}
     </Card>
   );
 }
@@ -161,14 +143,11 @@ function SummaryCard({ g }) {
 function HeaderSkeleton() {
   return (
     <div aria-busy="true">
-      <div className="flex items-center gap-3.5 px-1">
-        <Skeleton className="size-14 rounded-2xl" />
-        <div className="flex-1 space-y-2.5">
-          <Skeleton className="h-7 w-3/5" />
-          <Skeleton className="h-4 w-1/3" />
-        </div>
-      </div>
-      <Skeleton className="mt-5 h-[110px] w-full rounded-2xl" />
+      <Skeleton className="mt-2 h-8 w-3/5" />
+      <Skeleton className="mt-3 h-4 w-1/3" />
+      <Skeleton className="mt-9 h-4 w-44" />
+      <Skeleton className="mt-3 h-12 w-56" />
+      <Skeleton className="mt-6 h-4 w-52" />
     </div>
   );
 }

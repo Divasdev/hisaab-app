@@ -10,13 +10,12 @@ import { kindById } from '../lib/categories';
 import { cn } from '../lib/cn';
 import { timeLeft } from '../lib/dates';
 import { AuthFrame } from '../components/AuthFrame';
+import { Icon } from '../components/Icon';
 import { Avatar, AvatarStack } from '../components/ui/Avatar';
 import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
 import { EmptyState } from '../components/ui/EmptyState';
 import { FormError } from '../components/ui/Field';
 import { Skeleton } from '../components/ui/Skeleton';
-import { Tile } from '../components/ui/Tile';
 
 /**
  * Opened from an invite link: /join/<token>  (a personal link adds ?as=<member id>).
@@ -62,7 +61,7 @@ export default function JoinPage() {
   if (invite.error && !inv) {
     return (
       <AuthFrame>
-        <EmptyState icon="link" tone="tone-n" title="This invite link doesn't work" className="px-0" action={<Button to="/">Go to my groups</Button>}>
+        <EmptyState title="This invite link doesn't work" className="mt-10" action={<Button to="/">Go to my groups</Button>}>
           It may have been replaced by a newer link. Ask your friend to send the link again.
         </EmptyState>
       </AuthFrame>
@@ -71,12 +70,12 @@ export default function JoinPage() {
   if (!inv) {
     return (
       <AuthFrame>
-        <Card className="p-6" aria-busy="true">
-          <Skeleton className="size-14 rounded-2xl" />
-          <Skeleton className="mt-5 h-4 w-40" />
-          <Skeleton className="mt-3 h-8 w-56" />
-          <Skeleton className="mt-8 h-[52px] w-full rounded-[14px]" />
-        </Card>
+        <div className="mt-10" aria-busy="true">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="mt-3 h-8 w-44" />
+          <Skeleton className="mt-4 h-4 w-40" />
+          <Skeleton className="mt-10 h-14 w-full rounded-xl" />
+        </div>
       </AuthFrame>
     );
   }
@@ -85,7 +84,7 @@ export default function JoinPage() {
   if (inv.status === 'expired') {
     return (
       <AuthFrame>
-        <EmptyState icon="clock" tone="tone-5" title="This invite link has expired" className="px-0" action={<Button to="/">Go to my groups</Button>}>
+        <EmptyState title="This invite link has expired" className="mt-10" action={<Button to="/">Go to my groups</Button>}>
           Invite links work for 24 hours. Ask {inviter} for a new link to {inv.group.name}.
         </EmptyState>
       </AuthFrame>
@@ -94,7 +93,7 @@ export default function JoinPage() {
   if (inv.status === 'member') {
     return (
       <AuthFrame>
-        <EmptyState icon="checkCircle" tone="tone-2" title={`You're already in ${inv.group.name}`} className="px-0" action={<Button to={`/groups/${inv.group.id}`}>Open the group</Button>} />
+        <EmptyState title={`You're already in ${inv.group.name}`} className="mt-10" action={<Button to={`/groups/${inv.group.id}`}>Open the group</Button>} />
       </AuthFrame>
     );
   }
@@ -104,54 +103,49 @@ export default function JoinPage() {
   const mustPick = open.length > 0 && choice === null;
   return (
     <AuthFrame>
-      <Card className="p-6">
-        <Tile icon={kind.icon} tone={kind.tone} size="lg" />
-        <p className="mt-5 text-[15px] text-ink-2">{inviter} invited you to join</p>
-        <h1 className="mt-1 text-[28px] leading-tight font-bold tracking-[-0.025em]">{inv.group.name}</h1>
-        <div className="mt-4 flex items-center gap-2.5 text-[14.5px] text-ink-2">
-          <AvatarStack users={inv.group.members_preview} size="sm" max={5} />
-          {inv.group.member_count} {inv.group.member_count === 1 ? 'person' : 'people'}
-        </div>
+      <h1 className="mt-10 font-display text-[28px] leading-[38px] text-balance">
+        {inviter} invited you to {inv.group.name}
+      </h1>
+      <div className="mt-3 flex items-center gap-2.5 text-[15px] text-ink-2">
+        <AvatarStack users={inv.group.members_preview} size="sm" max={5} />
+        <span className="pt-0.5">
+          {inv.group.member_count} {inv.group.member_count === 1 ? 'person' : 'people'} · {kind.label}
+        </span>
+      </div>
 
-        {open.length > 0 && (
-          <fieldset className="mt-7">
-            <legend className="text-[16px] font-semibold">Which one are you?</legend>
-            <p className="mt-1 text-[14px] leading-snug text-ink-2">{inviter} already added some people by name. Pick yours and everything recorded for you becomes yours.</p>
-            <div className="mt-3 space-y-2" role="radiogroup">
-              {[...open, { id: 'new', name: `I'm not on this list` }].map((m) => {
-                const on = choice === m.id;
-                return (
-                  <button
-                    key={m.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={on}
-                    onClick={() => setChoice(m.id)}
-                    className={cn(
-                      'flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-[border-color,transform] active:scale-[0.99]',
-                      on ? 'border-accent shadow-[0_0_0_1px_var(--accent)]' : 'border-line hover:border-line-strong',
-                    )}
-                  >
-                    {m.id === 'new' ? <Avatar user={user} size="sm" /> : <Avatar user={m} size="sm" pending />}
-                    <span className="flex-1 text-[15.5px]">{m.name}</span>
-                    <span className={cn('grid size-5 place-items-center rounded-full border-2', on ? 'border-accent bg-accent' : 'border-line-strong')}>
-                      {on && <span className="size-2 rounded-full bg-white" />}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </fieldset>
-        )}
+      {open.length > 0 && (
+        <fieldset className="mt-9">
+          <legend className="pt-0.5 text-[20px] leading-tight font-bold">Which one are you?</legend>
+          <p className="mt-1.5 text-[15px] leading-snug text-ink-2">{inviter} already added some people by name. Pick yours and everything recorded for you becomes yours.</p>
+          <div className="mt-4 divide-y divide-line border-y border-line" role="radiogroup">
+            {[...open, { id: 'new', name: `I'm not on this list` }].map((m) => {
+              const on = choice === m.id;
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  onClick={() => setChoice(m.id)}
+                  className="flex min-h-14 w-full items-center gap-3 px-1 py-2.5 text-left hover:bg-surface-2 active:bg-sunken"
+                >
+                  {m.id === 'new' ? <Avatar user={user} size="sm" me /> : <Avatar user={m} size="sm" pending />}
+                  <span className={cn('min-w-0 flex-1 truncate pt-0.5 text-[17px] leading-6 text-ink', on && 'font-semibold')}>{m.name}</span>
+                  <span className="grid size-6 shrink-0 place-items-center text-accent-text">{on && <Icon name="check" size={20} strokeWidth={2.4} />}</span>
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+      )}
 
-        <div className="mt-7 space-y-3">
-          <FormError>{error}</FormError>
-          <Button size="lg" full loading={busy} disabled={mustPick} onClick={join}>
-            {mustPick ? 'Pick your name first' : picked ? `Join as ${picked.name}` : `Join ${inv.group.name}`}
-          </Button>
-          <p className="text-center text-[13px] text-ink-3">This link expires in {timeLeft(inv.expires_at)}.</p>
-        </div>
-      </Card>
+      <div className="mt-8 space-y-3">
+        <FormError>{error}</FormError>
+        <Button size="lg" full loading={busy} disabled={mustPick} onClick={join}>
+          {mustPick ? 'Pick your name first' : picked ? `Join as ${picked.name}` : `Join ${inv.group.name}`}
+        </Button>
+        <p className="text-[14px] text-ink-2">This link expires in {timeLeft(inv.expires_at)}.</p>
+      </div>
     </AuthFrame>
   );
 }

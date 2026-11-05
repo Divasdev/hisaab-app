@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Hisaab home</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&display=swap">
+<style>
+:root{--y:#ffd200;--k:#111111;--w:#ffffff;--owe:#c0261b;--get:#12784a;--sec:#55575c;--rule:#e3e3e3}
+html,body{width:390px;height:844px;overflow:hidden;margin:0}
+*{box-sizing:border-box}
+body{background:var(--w);color:var(--k);font-family:"Hind",system-ui,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+.screen{position:relative;width:390px;height:844px;overflow:hidden}
+.top{height:52px;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-weight:700;font-size:22px;line-height:1;padding-top:3px}
+.me{width:40px;height:40px;border-radius:4px;background:var(--k);color:var(--y);font-weight:600;font-size:15px;display:flex;align-items:center;justify-content:center;padding-top:2px}
+.band{background:var(--y);padding:16px 16px 16px}
+.band .l1{font-weight:600;font-size:22px;line-height:1.1;margin:0}
+.band .fig{font-weight:700;font-size:64px;line-height:1;margin:6px 0 10px;letter-spacing:-1px;padding-top:6px}
+.band hr{border:0;height:2px;background:var(--k);margin:0 0 12px}
+.sign{display:flex;align-items:center;gap:12px}
+.sign .arw{width:40px;height:40px;flex:none;background:var(--k);color:var(--y);font-weight:700;font-size:26px;display:flex;align-items:center;justify-content:center;padding-top:3px}
+.sign .msg{font-weight:600;font-size:18px;line-height:1.2;padding-top:3px}
+.sign .msg b{font-weight:700;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.sum{margin:0 16px;padding:14px 0 12px;display:grid;grid-template-columns:1fr 1fr;gap:16px;border-bottom:1px solid var(--rule)}
+.sum p{margin:0;font-size:15px;line-height:1.35;color:var(--k)}
+.sum strong{display:block;font-weight:600;font-size:15px}
+.owe{color:var(--owe)}.get{color:var(--get)}.zero{color:var(--sec)}
+.head{padding:16px 16px 6px;display:flex;align-items:center;justify-content:space-between}
+.head h2{margin:0;font-weight:700;font-size:22px;line-height:1;padding-top:3px}
+.ghost{height:40px;padding:3px 14px 0;background:var(--w);color:var(--k);border:2px solid var(--k);border-radius:4px;font:600 15px/1 "Hind",sans-serif}
+ul{list-style:none;margin:0;padding:0 16px}
+li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--rule)}
+li:last-child{border-bottom:0}
+.name{font-weight:600;font-size:17px;line-height:1.25}
+.meta{font-size:14px;line-height:1.3;color:var(--sec);margin-top:2px}
+.amt{text-align:right;flex:none}
+.dir{font-size:13px;font-weight:600;line-height:1.2}
+.val{font-size:22px;font-weight:700;line-height:1.15}
+.bar{position:absolute;left:0;right:0;bottom:0;background:var(--w);border-top:1px solid var(--rule);padding:16px}
+.add{width:100%;height:56px;border:0;border-radius:4px;background:var(--k);color:var(--y);font:700 19px/1 "Hind",sans-serif;padding-top:3px}
+</style>
+</head>
+<body>
+<div class="screen">
+  <header class="top">
+    <div class="brand">Hisaab</div>
+    <div class="me" aria-label="Divas Sharma">DS</div>
+  </header>
+
+  <section class="band" aria-label="Your overall balance">
+    <p class="l1">You owe</p>
+    <p class="fig">₹10,532.09</p>
+    <hr>
+    <div class="sign">
+      <span class="arw" aria-hidden="true">→</span>
+      <span class="msg">3 payments clear it · <b>Settle up</b></span>
+    </div>
+  </section>
+
+  <div class="sum">
+    <p><strong class="owe">₹10,611.34</strong>to pay in 2 groups</p>
+    <p><strong class="get">₹79.25</strong>to get back from 1 group</p>
+  </div>
+
+  <div class="head">
+    <h2>Groups</h2>
+    <button class="ghost">+ New group</button>
+  </div>
+
+  <ul>
+    <li>
+      <div><div class="name">Room 204, Godavari</div><div class="meta">4 members · 46 min ago</div></div>
+      <div class="amt get"><div class="dir">you get back</div><div class="val">₹79.25</div></div>
+    </li>
+    <li>
+      <div><div class="name">Flat 3B, Koramangala</div><div class="meta">3 members · Yesterday</div></div>
+      <div class="amt owe"><div class="dir">you owe</div><div class="val">₹1,818.00</div></div>
+    </li>
+    <li>
+      <div><div class="name">Goa trip, October</div><div class="meta">6 members · 26 Oct</div></div>
+      <div class="amt owe"><div class="dir">you owe</div><div class="val">₹8,793.34</div></div>
+    </li>
+    <li>
+      <div><div class="name">Navratri dandiya night</div><div class="meta">5 members · 2 Oct</div></div>
+      <div class="amt zero"><div class="dir">settled</div><div class="val">₹0.00</div></div>
+    </li>
+  </ul>
+
+  <div class="bar">
+    <button class="add">+ Add expense</button>
+  </div>
+</div>
+</body>
+</html>

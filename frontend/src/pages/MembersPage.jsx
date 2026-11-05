@@ -14,12 +14,11 @@ import { Icon } from '../components/Icon';
 import { InviteCard } from '../components/InviteCard';
 import { Avatar } from '../components/ui/Avatar';
 import { Button, IconButton } from '../components/ui/Button';
-import { Card, List, Row, SectionHeader } from '../components/ui/Card';
+import { List, Row, SectionHeader } from '../components/ui/Card';
 import { FormError, TextField } from '../components/ui/Field';
 import { Content, ErrorPage, LargeTitle, Page, TopBar } from '../components/ui/Page';
 import { ConfirmSheet, Sheet } from '../components/ui/Sheet';
 import { ListSkeleton } from '../components/ui/Skeleton';
-import { Tile } from '../components/ui/Tile';
 
 export default function MembersPage() {
   const { groupId } = useParams();
@@ -103,65 +102,69 @@ export default function MembersPage() {
       <TopBar back={`/groups/${groupId}`} backLabel={g?.name || 'Back'} title="Members" />
       <Content>
         <LargeTitle>Members</LargeTitle>
-        <p className="mt-1.5 px-1 text-[15.5px] text-ink-2">{g ? `${g.members.length} ${g.members.length === 1 ? 'person' : 'people'} in ${g.name}` : ' '}</p>
+        <p className="mt-1 text-[16px] leading-snug text-ink-2">{g ? `${g.members.length} ${g.members.length === 1 ? 'person' : 'people'} in ${g.name}` : ' '}</p>
 
         {!g ? (
           <ListSkeleton rows={4} className="mt-6" />
         ) : (
           <>
-            <SectionHeader
-              title="People"
-              action={
-                <Button variant="tinted" size="sm" className="h-10 px-3.5" icon={<Icon name="userPlus" size={17} strokeWidth={2.2} />} onClick={() => setEditFor('new')}>
-                  Add person
-                </Button>
-              }
-            />
-            <List>
-              {g.members.map((m) => (
-                <Row
-                  key={m.id}
-                  leading={<Avatar user={m} />}
-                  title={people.name(m.id)}
-                  subtitle={m.joined ? m.upi_id || 'No UPI ID yet' : m.invite_email ? `Not joined yet · ${m.invite_email}` : 'Not joined yet'}
-                  trailing={
-                    <span className="flex items-center gap-1.5">
-                      {m.role === 'admin' && m.joined && (
-                        <span className="rounded-md bg-accent-soft px-1.5 py-0.5 text-[12px] font-semibold text-accent-text">Admin</span>
-                      )}
-                      {!m.joined && (
-                        <Button variant="tinted" size="sm" onClick={() => invite(m)}>
-                          Invite
-                        </Button>
-                      )}
-                      {canOpenMenu(m) && (
-                        <IconButton label={`Options for ${m.name}`} onClick={() => setActionFor(m)} className="-mr-2">
-                          <Icon name="more" size={20} />
-                        </IconButton>
-                      )}
-                    </span>
-                  }
-                />
-              ))}
-            </List>
-            <p className="mt-2 px-1 text-[13px] leading-snug text-ink-3">
-              People who haven&apos;t joined can still be in expenses. When they open their invite, they tap their name and see everything.
-            </p>
+            <section aria-labelledby="people-h">
+              <SectionHeader
+                id="people-h"
+                title="People"
+                action={
+                  <Button variant="secondary" size="sm" icon={<Icon name="userPlus" size={17} />} onClick={() => setEditFor('new')}>
+                    Add person
+                  </Button>
+                }
+              />
+              <List>
+                {g.members.map((m) => (
+                  <Row
+                    key={m.id}
+                    leading={<Avatar user={m} me={m.id === g.my_member_id} />}
+                    title={people.name(m.id)}
+                    subtitle={memberLine(m)}
+                    trailing={
+                      (!m.joined || canOpenMenu(m)) && (
+                        <span className="flex shrink-0 items-center gap-1">
+                          {!m.joined && (
+                            <Button variant="secondary" size="sm" onClick={() => invite(m)}>
+                              Invite
+                            </Button>
+                          )}
+                          {canOpenMenu(m) && (
+                            <IconButton label={`Options for ${m.name}`} onClick={() => setActionFor(m)} className="-mr-2">
+                              <Icon name="more" size={20} />
+                            </IconButton>
+                          )}
+                        </span>
+                      )
+                    }
+                  />
+                ))}
+              </List>
+              <p className="mt-3 max-w-[60ch] px-1 text-[14px] leading-snug text-ink-2">
+                People who haven&apos;t joined can still be in expenses. When they open their invite, they tap their name and see everything.
+              </p>
+            </section>
 
-            <SectionHeader title="Invite link for everyone" />
-            <InviteCard groupId={g.id} groupName={g.name} isAdmin={isAdmin} />
+            <section aria-labelledby="invite-h">
+              <SectionHeader id="invite-h" title="Invite link for everyone" />
+              <InviteCard groupId={g.id} groupName={g.name} isAdmin={isAdmin} />
+            </section>
 
             {isAdmin && <GroupDetails g={g} />}
 
-            <SectionHeader title="Leave the group" />
-            <Card className="p-4">
-              <p className="text-[14.5px] leading-relaxed text-ink-2">
+            {/* Leaving sits apart at the very bottom, with space above it, so nobody taps it by accident. */}
+            <section aria-labelledby="leave-h" className="mt-14 border-t border-line">
+              <SectionHeader id="leave-h" title="Leave the group" className="pt-6" />
+              <p className="max-w-[60ch] text-[15px] leading-relaxed text-ink-2">
                 {leaveBlock || 'You will stop seeing this group. To come back, someone has to send you a new invite link.'}
               </p>
               <Button
                 variant="danger"
-                full
-                className="mt-3.5"
+                className="mt-4 w-full sm:w-auto"
                 disabled={Boolean(leaveBlock)}
                 onClick={() => {
                   setError('');
@@ -171,7 +174,7 @@ export default function MembersPage() {
               >
                 Leave group
               </Button>
-            </Card>
+            </section>
           </>
         )}
       </Content>
@@ -181,59 +184,65 @@ export default function MembersPage() {
         open={Boolean(actionFor)}
         onClose={() => setActionFor(null)}
         title={actionFor?.name}
-        description={actionFor && (actionFor.joined ? balanceSentence(actionFor) : `Not joined yet · ${balanceSentence(actionFor).toLowerCase()}`)}
+        description={actionFor && (actionFor.joined ? balanceSentence(actionFor) : `Hasn't joined yet · ${balanceSentence(actionFor).toLowerCase()}`)}
       >
         {actionFor && (
-          <List className="bg-surface/70">
-            {!actionFor.joined && (
-              <>
+          <>
+            <List>
+              {!actionFor.joined && (
+                <>
+                  <Row
+                    onClick={() => {
+                      const m = actionFor;
+                      setActionFor(null);
+                      invite(m);
+                    }}
+                    title="Send invite"
+                    subtitle="A message with a link that picks their name"
+                  />
+                  <Row
+                    onClick={() => {
+                      const m = actionFor;
+                      setActionFor(null);
+                      setEditFor(m);
+                    }}
+                    title="Edit name or email"
+                  />
+                </>
+              )}
+              {actionFor.joined && isAdmin && (
                 <Row
-                  onClick={() => {
-                    const m = actionFor;
-                    setActionFor(null);
-                    invite(m);
-                  }}
-                  leading={<Tile icon="share" tone="tone-accent" size="sm" />}
-                  title="Send invite"
-                  subtitle="A message with a link that picks their name"
+                  onClick={() => toggleAdmin(actionFor)}
+                  title={actionFor.role === 'admin' ? 'Remove admin rights' : 'Make admin'}
+                  subtitle={actionFor.role === 'admin' ? 'They can still add expenses' : 'Admins can rename the group and manage people'}
                 />
-                <Row
-                  onClick={() => {
-                    const m = actionFor;
-                    setActionFor(null);
-                    setEditFor(m);
-                  }}
-                  leading={<Tile icon="pencil" tone="tone-n" size="sm" />}
-                  title="Edit name or email"
-                />
-              </>
-            )}
-            {actionFor.joined && isAdmin && (
-              <Row
-                onClick={() => toggleAdmin(actionFor)}
-                leading={<Tile icon="shield" tone="tone-4" size="sm" />}
-                title={actionFor.role === 'admin' ? 'Remove admin rights' : 'Make admin'}
-                subtitle={actionFor.role === 'admin' ? 'They can still add expenses' : 'Admins can rename the group and manage people'}
-              />
-            )}
+              )}
+            </List>
             {isAdmin && (
-              <Row
-                onClick={
-                  actionFor.balance_paise === 0
-                    ? () => {
-                        const m = actionFor;
-                        setActionFor(null);
-                        setError('');
-                        setConfirm({ type: 'remove', member: m });
-                      }
-                    : undefined
-                }
-                leading={<Tile icon="logOut" tone="tone-7" size="sm" />}
-                title={<span className={actionFor.balance_paise === 0 ? 'text-owe' : 'text-ink-3'}>Remove from group</span>}
-                subtitle={actionFor.balance_paise === 0 ? 'Their past expenses stay in the group' : 'They need to settle up first'}
-              />
+              <div className="mt-10">
+                <Button
+                  variant="danger"
+                  full
+                  disabled={actionFor.balance_paise !== 0}
+                  onClick={
+                    actionFor.balance_paise === 0
+                      ? () => {
+                          const m = actionFor;
+                          setActionFor(null);
+                          setError('');
+                          setConfirm({ type: 'remove', member: m });
+                        }
+                      : undefined
+                  }
+                >
+                  Remove from group
+                </Button>
+                <p className="mt-2 text-center text-[14px] text-ink-2">
+                  {actionFor.balance_paise === 0 ? 'Their past expenses stay in the group' : 'They need to settle up first'}
+                </p>
+              </div>
             )}
-          </List>
+          </>
         )}
       </Sheet>
 
@@ -274,6 +283,13 @@ export default function MembersPage() {
       </ConfirmSheet>
     </Page>
   );
+}
+
+/** The line under a person's name: Admin, Hasn't joined yet, or their UPI ID. */
+function memberLine(m) {
+  if (!m.joined) return m.invite_email ? `Hasn't joined yet · ${m.invite_email}` : "Hasn't joined yet";
+  const upi = m.upi_id || 'No UPI ID yet';
+  return m.role === 'admin' ? `Admin · ${upi}` : upi;
 }
 
 function balanceSentence(m) {
@@ -377,29 +393,32 @@ function GroupDetails({ g }) {
   }
 
   return (
-    <>
-      <SectionHeader title="Group details" />
-      <Card as="form" onSubmit={save} className="space-y-4 p-4">
+    <section aria-labelledby="details-h">
+      <SectionHeader id="details-h" title="Group details" />
+      <form onSubmit={save} className="space-y-5">
         <TextField label="Name" value={name} onChange={(e) => setName(e.target.value)} maxLength={40} />
         <div>
-          <p className="mb-2 px-0.5 text-[14px] font-medium text-ink-2">Kind</p>
+          <p className="mb-2 text-[15px] font-semibold text-ink">Kind</p>
           <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Kind of group">
-            {GROUP_KINDS.map((k) => (
-              <button
-                key={k.id}
-                type="button"
-                role="radio"
-                aria-checked={kind === k.id}
-                onClick={() => setKind(k.id)}
-                className={cn(
-                  'inline-flex h-10 items-center gap-2 rounded-xl border px-3 text-[14.5px] font-medium transition-[border-color,transform] active:scale-[0.97]',
-                  kind === k.id ? 'border-accent bg-accent-soft text-accent-text' : 'border-line bg-surface text-ink-2 hover:border-line-strong',
-                )}
-              >
-                <Icon name={k.icon} size={16} />
-                {k.label}
-              </button>
-            ))}
+            {GROUP_KINDS.map((k) => {
+              const on = kind === k.id;
+              return (
+                <button
+                  key={k.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  onClick={() => setKind(k.id)}
+                  className={cn(
+                    'inline-flex h-11 items-center gap-1.5 rounded-lg border-[1.5px] px-3.5 pt-0.5 text-[15px]',
+                    on ? 'border-accent-text bg-accent-soft font-semibold text-accent-text' : 'border-line-strong bg-surface font-medium text-ink-2 hover:text-ink',
+                  )}
+                >
+                  {on && <Icon name="check" size={15} strokeWidth={2.4} className="-mt-0.5" />}
+                  {k.label}
+                </button>
+              );
+            })}
           </div>
         </div>
         <FormError>{error}</FormError>
@@ -408,7 +427,7 @@ function GroupDetails({ g }) {
             Save changes
           </Button>
         )}
-      </Card>
-    </>
+      </form>
+    </section>
   );
 }

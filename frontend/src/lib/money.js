@@ -5,10 +5,13 @@ const whole = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR
 const fraction = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const grouping = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
 
-/** 12000000 -> "₹1,20,000"   34050 -> "₹340.50"   (always the absolute value) */
-export function formatINR(paise) {
+/**
+ * 12000000 -> "₹1,20,000"   34050 -> "₹340.50"   (always the absolute value)
+ * { exact: true } always shows paise ("₹1,818.00"), so amounts in a right-aligned column line up.
+ */
+export function formatINR(paise, { exact = false } = {}) {
   const abs = Math.abs(Math.round(paise || 0));
-  return abs % 100 === 0 ? whole.format(abs / 100) : fraction.format(abs / 100);
+  return abs % 100 === 0 && !exact ? whole.format(abs / 100) : fraction.format(abs / 100);
 }
 
 /** "1,200.5" -> 120050. Returns 0 for empty or invalid text. Works on the string, not floats. */

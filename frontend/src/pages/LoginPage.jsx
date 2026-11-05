@@ -33,29 +33,32 @@ export default function LoginPage() {
 
   return (
     <AuthFrame>
-      <h1 className="text-[30px] leading-tight font-bold tracking-[-0.025em]">Welcome back</h1>
-      <p className="mt-2 text-[16px] text-ink-2">Log in to see who owes whom.</p>
-      <form onSubmit={submit} className="mt-8 space-y-4" noValidate>
-        <TextField label="Email" type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        <TextField
-          label="Password"
-          type={show ? 'text' : 'password'}
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          trailing={
-            <IconButton label={show ? 'Hide password' : 'Show password'} onClick={() => setShow((v) => !v)}>
-              <Icon name={show ? 'eyeOff' : 'eye'} size={19} />
-            </IconButton>
-          }
-        />
-        <FormError>{error}</FormError>
-        <Button type="submit" size="lg" full loading={busy === 'form'} disabled={!email || !password || !!busy}>
-          Log in
-        </Button>
+      <h1 className="mt-10 pt-0.5 text-[22px] leading-7 font-bold">Welcome back</h1>
+      <form onSubmit={submit} className="mt-5" noValidate>
+        <div className="space-y-4">
+          <TextField label="Email" type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <TextField
+            label="Password"
+            type={show ? 'text' : 'password'}
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            trailing={
+              <IconButton label={show ? 'Hide password' : 'Show password'} onClick={() => setShow((v) => !v)}>
+                <Icon name={show ? 'eyeOff' : 'eye'} size={19} />
+              </IconButton>
+            }
+          />
+        </div>
+        <div className="mt-6 space-y-4">
+          <FormError>{error}</FormError>
+          <Button type="submit" size="lg" full loading={busy === 'form'} disabled={!email || !password || !!busy}>
+            Log in
+          </Button>
+        </div>
       </form>
-      <div className="my-6 flex items-center gap-3 text-[13px] text-ink-3">
+      <div className="my-4 flex items-center gap-3 text-[14px] text-ink-2">
         <span className="h-px flex-1 bg-line" />
         or
         <span className="h-px flex-1 bg-line" />
@@ -63,9 +66,13 @@ export default function LoginPage() {
       <Button variant="secondary" size="lg" full loading={busy === 'demo'} disabled={!!busy} onClick={() => submit(null, true)}>
         Try the demo account
       </Button>
-      <p className="mt-8 text-center text-[15px] text-ink-2">
+      <p className="mt-8 text-[15px] text-ink-2">
         New to Hisaab?{' '}
-        <Link to="/signup" state={location.state} className="font-semibold text-accent-text underline-offset-4 hover:underline">
+        <Link
+          to="/signup"
+          state={location.state}
+          className="-mx-1 inline-flex min-h-11 items-center rounded-md px-1 pt-0.5 font-semibold text-accent-text underline decoration-[1.5px] underline-offset-4 hover:bg-accent-soft"
+        >
           Create an account
         </Link>
       </p>

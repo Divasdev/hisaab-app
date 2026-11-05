@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-/** true once the page has scrolled past `threshold` px (used to materialise the glass top bar). */
+/** true once the page has scrolled past `threshold` px (used to show the top bar's hairline and small title). */
 export function useScrolled(threshold = 4) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {

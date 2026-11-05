@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Hisaab Home</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600&family=Teko:wght@500;600&display=swap">
+<style>
+:root{--board:#17402f;--plate:#f3f4f1;--ink:#121212;--yellow:#f5c400;--owe:#c8331f;--get:#1b6e3f;--muted:#5b6159;--soft:#bcd3c6}
+*{box-sizing:border-box}
+html,body{width:390px;height:844px;overflow:hidden;margin:0}
+body{position:relative;background:var(--plate);color:var(--ink);font-family:"Hind",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,p,ol{margin:0;padding:0}
+.t{font-family:"Teko",sans-serif;font-variant-numeric:tabular-nums;text-transform:uppercase;line-height:1}
+
+.board{height:300px;background:var(--board);color:#fff;padding:16px 20px 0}
+.top{display:flex;justify-content:space-between;align-items:center;height:40px}
+.mark{font-weight:600;font-size:30px;letter-spacing:.22em;color:#fff}
+.me{width:40px;height:40px;border-radius:3px;background:var(--plate);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:23px;letter-spacing:.04em;padding-top:3px}
+.hi{margin-top:14px;font-size:16px;font-weight:500;color:var(--soft)}
+.label{color:var(--yellow);font-weight:500;letter-spacing:.08em}
+.overall{margin-top:18px;font-size:18px}
+
+.plates{display:flex;align-items:stretch;gap:4px;height:50px;margin-top:10px}
+.plates b{width:34px;height:50px;border-radius:3px;background:var(--plate);color:var(--ink);font-weight:500;font-size:44px;display:flex;align-items:center;justify-content:center;padding-top:6px}
+.paint{color:#fff;font-weight:500;font-size:44px;display:flex;padding-top:6px}
+.paint.rs{align-items:center;margin-right:4px;font-family:"Hind",sans-serif;font-weight:500;font-size:34px;padding-top:6px}
+.paint.sep{align-items:flex-end;width:10px;justify-content:center;padding:0 0 2px}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+.split .label{font-size:16px}
+.amt{font-size:27px;font-weight:500;color:#fff;margin-top:4px}
+.meta{font-size:14px;color:var(--soft);margin-top:1px}
+
+.ground{padding:18px 16px 0}
+.head{display:flex;justify-content:space-between;align-items:center;height:40px;margin-bottom:12px}
+.head h2{font-weight:600;font-size:26px;letter-spacing:.06em;padding-top:4px}
+.new{height:40px;padding:0 14px;border:0;border-radius:6px;background:var(--board);color:#fff;font:600 15px/1 "Hind",sans-serif;padding-top:2px}
+
+.order{list-style:none}
+.order li{display:grid;grid-template-columns:24px 1fr auto;column-gap:12px;align-items:center;height:70px;border-top:1.5px solid var(--ink)}
+.no{font-size:31px;font-weight:500;color:var(--muted);padding-top:5px}
+.order li:last-child{border-bottom:1.5px solid var(--ink)}
+.who{min-width:0}
+.name{font-size:17px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:13.5px;color:var(--muted);line-height:1.3;margin-top:2px}
+.stand{text-align:right;display:flex;flex-direction:column;align-items:flex-end}
+.stand span{font-size:14px;font-weight:600;letter-spacing:.07em}
+.stand strong{font-size:28px;font-weight:500;margin-top:1px}
+.get{color:var(--get)}
+.owe{color:var(--owe)}
+.done{color:var(--muted)}
+
+.bar{position:absolute;left:0;right:0;bottom:0;background:var(--plate);border-top:2px solid var(--ink);padding:16px}
+.add{width:100%;height:56px;border:0;border-radius:6px;background:var(--yellow);color:var(--ink);font-weight:600;font-size:25px;letter-spacing:.08em;padding-top:4px;cursor:pointer}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+</style>
+</head>
+<body>
+<header class="board">
+  <div class="top">
+    <h1 class="t mark">Hisaab</h1>
+    <div class="t me" aria-label="Divas Sharma">DS</div>
+  </div>
+  <p class="hi">Hi, Divas</p>
+  <p class="t label overall">Overall · You owe</p>
+  <div class="t plates" role="img" aria-label="You owe ₹10,532.09 overall">
+    <span class="paint rs">₹</span><b>1</b><b>0</b><span class="paint sep">,</span><b>5</b><b>3</b><b>2</b><span class="paint sep">.</span><b>0</b><b>9</b>
+  </div>
+  <div class="split">
+    <div>
+      <p class="t label">You owe</p>
+      <p class="t amt">₹10,611.34</p>
+      <p class="meta">in 2 groups</p>
+    </div>
+    <div>
+      <p class="t label">You get back</p>
+      <p class="t amt">₹79.25</p>
+      <p class="meta">in 1 group</p>
+    </div>
+  </div>
+</header>
+
+<main class="ground">
+  <div class="head">
+    <h2 class="t">Groups</h2>
+    <button class="new" type="button">+ New group</button>
+  </div>
+  <ol class="order">
+    <li>
+      <span class="t no">1</span>
+      <div class="who"><p class="name">Room 204, Godavari</p><p class="sub">4 members · 46 min ago</p></div>
+      <div class="t stand get"><span>You get back</span><strong>₹79.25</strong></div>
+    </li>
+    <li>
+      <span class="t no">2</span>
+      <div class="who"><p class="name">Flat 3B, Koramangala</p><p class="sub">3 members · Yesterday</p></div>
+      <div class="t stand owe"><span>You owe</span><strong>₹1,818.00</strong></div>
+    </li>
+    <li>
+      <span class="t no">3</span>
+      <div class="who"><p class="name">Goa trip, October</p><p class="sub">6 members · 26 Oct</p></div>
+      <div class="t stand owe"><span>You owe</span><strong>₹8,793.34</strong></div>
+    </li>
+    <li>
+      <span class="t no">4</span>
+      <div class="who"><p class="name">Navratri dandiya night</p><p class="sub">5 members · 2 Oct</p></div>
+      <div class="t stand done"><span>Settled</span><strong>₹0.00</strong></div>
+    </li>
+  </ol>
+</main>
+
+<div class="bar">
+  <button class="t add" type="button">+ Add expense</button>
+</div>
+</body>
+</html>
