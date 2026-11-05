@@ -1,0 +1,216 @@
+# Hisaab GraphQL schema: the READ side of the API.
+#
+# The rule in Hisaab:  screens READ with GraphQL (POST /api/graphql),
+#                      buttons WRITE with REST (POST/PATCH/DELETE /api/...),
+#                      log in / sign up / who-am-I stay REST.
+#
+# Conventions, so GraphQL and REST return the same shapes:
+# - field names are snake_case (in Strawberry: StrawberryConfig(auto_camel_case=False))
+# - ids are Int, not GraphQL's ID type (ID would turn them into strings)
+# - money is always an Int in paise (₹1 = 100 paise)
+# - times are ISO 8601 strings; expense dates are "YYYY-MM-DD"
+#
+# Users vs members:
+# - a User is an account (someone who signed up)
+# - a Member is a person inside ONE group. A member either has an account (joined = true)
+#   or is just a name someone typed (joined = false) until that friend joins and claims it.
+# - expenses, splits and payments point to MEMBERS, so you can split with friends before they join.
+#
+# Errors come back in the "errors" list with extensions.code:
+# UNAUTHENTICATED, FORBIDDEN, NOT_FOUND, BAD_USER_INPUT.
+
+scalar JSON
+
+enum GroupKind { hostel flat trip other }
+enum Role { admin member }
+enum SplitType { equal exact shares }
+enum PaymentMethod { upi cash }
+enum Category { food groceries rent bills travel stay household fun other }
+enum InviteStatus { valid expired member }
+
+type Query {
+  "Every group I am in, newest activity first."
+  groups: [Group!]!
+
+  "My totals across all my groups."
+  my_balance: OverallBalance!
+
+  "Recent activity across all my groups."
+  recent_activity(limit: Int = 12): [Activity!]!
+
+  "Places where someone added me by my email and I have not answered yet."
+  my_invites: [PendingInvite!]!
+
+  "One group. FORBIDDEN if I am not a member, NOT_FOUND if it does not exist."
+  group(id: Int!): Group
+
+  "One expense. NOT_FOUND if it does not exist or was deleted."
+  expense(id: Int!): Expense
+
+  "What the join page shows for an invite link. Works for non-members. NOT_FOUND if unknown or reset."
+  invite(token: String!): InvitePreview
+}
+
+"An account."
+type User {
+  id: Int!
+  name: String!
+  upi_id: String
+}
+
+"A person inside one group."
+type Member {
+  "Member id. Expenses, splits and payments use this id."
+  id: Int!
+  "The account linked to this member, or null if they have not joined yet."
+  user_id: Int
+  "The account's name once joined; before that, the name typed when they were added."
+  name: String!
+  "Their UPI ID (only once joined)."
+  upi_id: String
+  joined: Boolean!
+  role: Role!
+  joined_at: String
+  "The email typed when they were added, until they join. Lets them see the invite inside the app."
+  invite_email: String
+  "Net balance in this group. Above 0: gets back. Below 0: owes."
+  balance_paise: Int!
+}
+
+type Group {
+  id: Int!
+  name: String!
+  kind: GroupKind!
+  created_at: String!
+  "My own member id in this group (compare it with paid_by, member_id, …)."
+  my_member_id: Int!
+  my_role: Role!
+  my_balance_paise: Int!
+  total_spent_paise: Int!
+  member_count: Int!
+  last_activity_at: String!
+  "Everyone in the group, joined or not."
+  members: [Member!]!
+  "People who were removed or left, but still appear in old expenses."
+  past_members: [Member!]!
+  "Expenses that are not deleted, newest first."
+  expenses(limit: Int): [Expense!]!
+  "Payments, newest first."
+  settlements: [Settlement!]!
+  balances: Balances!
+  activity(limit: Int = 60): [Activity!]!
+}
+
+type Expense {
+  id: Int!
+  group_id: Int!
+  description: String!
+  amount_paise: Int!
+  "Member id of the person who paid."
+  paid_by: Int!
+  payer: Member!
+  split_type: SplitType!
+  category: Category!
+  date: String!
+  note: String!
+  "User id of the account that added it."
+  created_by: Int!
+  creator: User!
+  created_at: String!
+  updated_at: String!
+  splits: [Split!]!
+  group: Group!
+}
+
+type Split {
+  member_id: Int!
+  member: Member!
+  amount_paise: Int!
+  "Only set when split_type is shares."
+  shares: Int
+}
+
+type Settlement {
+  id: Int!
+  group_id: Int!
+  from_member_id: Int!
+  to_member_id: Int!
+  from_member: Member!
+  to_member: Member!
+  amount_paise: Int!
+  method: PaymentMethod!
+  "User id of the account that recorded it."
+  created_by: Int!
+  created_at: String!
+}
+
+"One payment in a plan: from_member pays to_member."
+type Transfer {
+  from_member_id: Int!
+  to_member_id: Int!
+  from_member: Member!
+  to_member: Member!
+  amount_paise: Int!
+}
+
+type Balances {
+  "The fewest payments that clear the group (greedy)."
+  suggested: [Transfer!]!
+  "Who owes whom directly, without combining."
+  pairwise: [Transfer!]!
+}
+
+type OverallBalance {
+  owed_to_me_paise: Int!
+  i_owe_paise: Int!
+  net_paise: Int!
+  groups_owed: Int!
+  groups_owe: Int!
+}
+
+type Activity {
+  id: Int!
+  "group_created, member_added, member_claimed, expense_added, payment_added, … (16 kinds)"
+  type: String!
+  created_at: String!
+  actor: User!
+  "Details for this type. Every *member_id also has *member_id_name and *member_id_is_me."
+  data: JSON!
+  group: Group!
+}
+
+"""
+A deliberately small view of a group for people who are NOT members yet.
+It is not the Group type, so a non-member can never reach expenses or balances through it.
+"""
+type InviteGroup {
+  id: Int!
+  name: String!
+  kind: GroupKind!
+  member_count: Int!
+  members_preview: [OpenMember!]!
+}
+
+"A name in a group, as shown to someone who is not a member yet."
+type OpenMember {
+  id: Int!
+  name: String!
+}
+
+type InvitePreview {
+  status: InviteStatus!
+  expires_at: String!
+  invited_by: User!
+  group: InviteGroup!
+  "Names added to the group that nobody has claimed yet. The join page asks: which one are you?"
+  open_members: [OpenMember!]!
+}
+
+"Someone added me to a group using my email."
+type PendingInvite {
+  member_id: Int!
+  "The name they typed for me."
+  name: String!
+  added_by: User!
+  group: InviteGroup!
+}

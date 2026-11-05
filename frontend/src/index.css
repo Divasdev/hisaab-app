@@ -1,0 +1,217 @@
+@import "tailwindcss";
+
+/* Dark mode follows a `.dark` class on <html> (set by ThemeContext), so the user can override the OS. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Colour tokens ─────────────────────────────────────────────
+   One muted accent (indigo). Green and red are kept only for money direction:
+   owed = money comes back to you, owe = you have to pay. */
+:root {
+  --bg: #f4f3ef;
+  --surface: #ffffff;
+  --surface-2: #f7f6f3;
+  --sunken: #eceae4;
+  --line: #e4e2db;
+  --line-strong: #d4d1c8;
+  --ink: #1c1d20;
+  --ink-2: #5d5f66;
+  --ink-3: #67696f;
+  --accent: #3f4c8f;
+  --accent-hover: #35407a;
+  --accent-ink: #ffffff;
+  --accent-soft: #eceef8;
+  --accent-text: #3f4c8f;
+  --owed: #1d7548;
+  --owed-soft: #e5f2ea;
+  --owe: #b3392b;
+  --owe-soft: #fbeae7;
+  --scrim: rgb(20 21 24 / 0.32);
+
+  /* Frosted materials. Bars are lighter, sheets are thicker (bigger surface = heavier material). */
+  --glass-bar: rgb(250 249 246 / 0.72);
+  --glass-sheet: rgb(255 255 255 / 0.84);
+  --glass-edge: rgb(255 255 255 / 0.65);
+  --glass-line: rgb(28 29 32 / 0.08);
+  --toast: rgb(32 33 38 / 0.9);
+
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #111214;
+  --surface: #1a1b1f;
+  --surface-2: #202126;
+  --sunken: #26272d;
+  --line: #2c2d33;
+  --line-strong: #3a3b42;
+  --ink: #ededef;
+  --ink-2: #a6a8b0;
+  --ink-3: #9092a0;
+  --accent: #5865c4;
+  --accent-hover: #6672d0;
+  --accent-ink: #ffffff;
+  --accent-soft: #23263d;
+  --accent-text: #a9b2f2;
+  --owed: #5cc28d;
+  --owed-soft: #16271e;
+  --owe: #f08070;
+  --owe-soft: #2e1a17;
+  --scrim: rgb(0 0 0 / 0.5);
+
+  --glass-bar: rgb(22 23 26 / 0.72);
+  --glass-sheet: rgb(30 31 36 / 0.84);
+  --glass-edge: rgb(255 255 255 / 0.07);
+  --glass-line: rgb(255 255 255 / 0.08);
+  --toast: rgb(46 47 54 / 0.92);
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-sunken: var(--sunken);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-text: var(--accent-text);
+  --color-owed: var(--owed);
+  --color-owed-soft: var(--owed-soft);
+  --color-owe: var(--owe);
+  --color-owe-soft: var(--owe-soft);
+}
+
+@theme {
+  /* System font: SF Pro on Apple devices, Roboto on Android. Native optical sizing and tracking. */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+  --shadow-sheet: 0 -1px 0 0 var(--glass-edge) inset, 0 24px 60px -12px rgb(0 0 0 / 0.28), 0 2px 8px rgb(0 0 0 / 0.06);
+  --shadow-toast: 0 12px 32px -8px rgb(0 0 0 / 0.35);
+  --shadow-lift: 0 1px 2px rgb(0 0 0 / 0.05), 0 4px 14px -6px rgb(0 0 0 / 0.1);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-enter: enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade: fade 220ms ease-out both;
+  --animate-pop: pop 360ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+
+  @keyframes enter {
+    from { opacity: 0; transform: translateY(8px); }
+  }
+  @keyframes fade {
+    from { opacity: 0; }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.6); }
+  }
+}
+
+/* ── Materials ─────────────────────────────────────────────── */
+@utility glass-bar {
+  background-color: var(--glass-bar);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+}
+@utility glass-sheet {
+  background-color: var(--glass-sheet);
+  -webkit-backdrop-filter: blur(32px) saturate(190%);
+  backdrop-filter: blur(32px) saturate(190%);
+}
+@utility glass-toast {
+  background-color: var(--toast);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+}
+
+/* Avatar and icon tile colours: soft background + strong foreground, AA contrast in both themes. */
+@utility tone-0 { --tone-bg: #e6ebf7; --tone-fg: #2c467a; }
+@utility tone-1 { --tone-bg: #f6e7dc; --tone-fg: #8a4518; }
+@utility tone-2 { --tone-bg: #e2f0e8; --tone-fg: #23613f; }
+@utility tone-3 { --tone-bg: #f4e3ec; --tone-fg: #84335b; }
+@utility tone-4 { --tone-bg: #ebe7f7; --tone-fg: #4c3b8c; }
+@utility tone-5 { --tone-bg: #f5edd5; --tone-fg: #6d5512; }
+@utility tone-6 { --tone-bg: #dff0f2; --tone-fg: #1d5c66; }
+@utility tone-7 { --tone-bg: #f5e3e0; --tone-fg: #8c3428; }
+@utility tone-n { --tone-bg: var(--sunken); --tone-fg: var(--ink-2); }
+@utility tone-accent { --tone-bg: var(--accent-soft); --tone-fg: var(--accent-text); }
+
+/* Unlayered so these win over the utilities above. */
+.dark .tone-0 { --tone-bg: #1e2740; --tone-fg: #a9bdf0; }
+.dark .tone-1 { --tone-bg: #3a2618; --tone-fg: #f0b48b; }
+.dark .tone-2 { --tone-bg: #17301f; --tone-fg: #8fd6ad; }
+.dark .tone-3 { --tone-bg: #36202b; --tone-fg: #ecaaca; }
+.dark .tone-4 { --tone-bg: #272140; --tone-fg: #bfb2f2; }
+.dark .tone-5 { --tone-bg: #332b14; --tone-fg: #e6cd7c; }
+.dark .tone-6 { --tone-bg: #15303a; --tone-fg: #8dd2dc; }
+.dark .tone-7 { --tone-bg: #3a1e1a; --tone-fg: #f2a497; }
+
+/* ── Base ──────────────────────────────────────────────────── */
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 250ms ease;
+  }
+  body {
+    min-height: 100dvh;
+    background: var(--bg);
+    font-size: 16px;
+    line-height: 1.45;
+    letter-spacing: -0.006em;
+  }
+  ::selection {
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  button,
+  [role="button"],
+  a {
+    touch-action: manipulation;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+/* People who ask for less transparency get solid bars and sheets. */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-bar { background-color: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .glass-sheet { background-color: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .glass-toast { background-color: #202126; -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@media (prefers-contrast: more) {
+  :root { --line: #b9b6ac; --ink-2: #44464c; --glass-bar: var(--surface); --glass-sheet: var(--surface); }
+}
+
+/* Reduced motion: no slides or springs, only quick fades. */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

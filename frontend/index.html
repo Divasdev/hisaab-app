@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Split expenses with your hostel room, flat or trip. See who owes whom and settle up with UPI." />
+    <meta name="theme-color" content="#F4F3EF" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Hisaab</title>
+    <script>
+      // Apply the saved theme before React loads, so dark mode doesn't flash white.
+      try {
+        var t = localStorage.getItem('hisaab.theme') || 'system';
+        var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
