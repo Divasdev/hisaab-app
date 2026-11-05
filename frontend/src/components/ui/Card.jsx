@@ -13,7 +13,7 @@ export function List({ className, ...rest }) {
 
 export function SectionHeader({ title, action, className, id }) {
   return (
-    <div className={cn('flex items-end justify-between gap-3 px-1 pt-7 pb-2.5', className)}>
+    <div className={cn('flex items-center justify-between gap-3 px-1 pt-7 pb-2.5', className)}>
       <h2 id={id} className="text-[17px] font-semibold tracking-[-0.01em]">
         {title}
       </h2>

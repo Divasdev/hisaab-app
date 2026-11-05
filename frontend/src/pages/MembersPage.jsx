@@ -112,7 +112,7 @@ export default function MembersPage() {
             <SectionHeader
               title="People"
               action={
-                <Button variant="ghost" size="sm" className="-mr-2 text-accent-text" icon={<Icon name="userPlus" size={17} />} onClick={() => setEditFor('new')}>
+                <Button variant="tinted" size="sm" className="h-10 px-3.5" icon={<Icon name="userPlus" size={17} strokeWidth={2.2} />} onClick={() => setEditFor('new')}>
                   Add person
                 </Button>
               }

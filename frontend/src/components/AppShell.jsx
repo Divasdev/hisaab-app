@@ -9,6 +9,7 @@ import { cn } from '../lib/cn';
 import { kindById } from '../lib/categories';
 import { Icon } from './Icon';
 import { Avatar } from './ui/Avatar';
+import { Button } from './ui/Button';
 import { Wordmark } from './ui/Brand';
 import { BalanceInline } from './ui/Money';
 import { Skeleton } from './ui/Skeleton';
@@ -63,9 +64,9 @@ function Sidebar() {
         </NavLink>
         <div className="flex items-center justify-between px-2.5 pt-6 pb-2">
           <span className="text-[13px] font-semibold text-ink-3">Groups</span>
-          <Link to="/groups/new" aria-label="New group" title="New group" className="grid size-7 place-items-center rounded-lg text-ink-2 hover:bg-sunken hover:text-ink">
-            <Icon name="plus" size={17} />
-          </Link>
+          <Button variant="tinted" size="sm" to="/groups/new" icon={<Icon name="plus" size={16} strokeWidth={2.2} />} className="-mr-1 h-8 px-2.5 text-[13.5px]">
+            New group
+          </Button>
         </div>
         <ul className="space-y-0.5">
           {!groups.data &&

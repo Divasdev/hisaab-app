@@ -79,7 +79,8 @@ export default function HomePage() {
                 id="groups-h"
                 title="Groups"
                 action={
-                  <Button variant="ghost" size="sm" to="/groups/new" icon={<Icon name="plus" size={17} />} className="-mr-2 text-accent-text">
+                  // Tinted, not solid: "Add expense" is the one solid button on this screen, so the two don't compete.
+                  <Button variant="tinted" size="sm" to="/groups/new" icon={<Icon name="plus" size={17} strokeWidth={2.2} />} className="h-10 px-3.5">
                     New group
                   </Button>
                 }
