@@ -77,7 +77,7 @@ export function createExpense(groupId, body) {
   }, { write: true });
 }
 
-/** PATCH /api/expenses/{id} -> expense (any member can edit; the change is logged) */
+/** PUT /api/expenses/{id} -> expense (the full expense body, like create; any member can edit; the change is logged) */
 export function updateExpense(expenseId, body) {
   return request((s) => {
     const user = me(s);

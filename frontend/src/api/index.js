@@ -37,7 +37,7 @@ export const REST_ROUTES = {
   acceptInvite: 'POST /api/members/{member_id}/accept',
   declineInvite: 'POST /api/members/{member_id}/decline',
   createExpense: 'POST /api/groups/{id}/expenses',
-  updateExpense: 'PATCH /api/expenses/{id}',
+  updateExpense: 'PUT /api/expenses/{id}',
   deleteExpense: 'DELETE /api/expenses/{id}',
   restoreExpense: 'POST /api/expenses/{id}/restore',
   createSettlement: 'POST /api/groups/{id}/settlements',

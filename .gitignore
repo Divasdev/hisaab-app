@@ -1,0 +1,20 @@
+# Personal docs: contract, guides, learning path, build board. They stay on this computer.
+docs/
+
+# Secrets
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Node (frontend/ also has its own .gitignore)
+node_modules/
+dist/
+
+# macOS
+.DS_Store

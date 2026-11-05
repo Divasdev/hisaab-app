@@ -3,7 +3,7 @@ import { UPI_ID_PATTERN } from '../lib/upi';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** POST /api/auth/signup  { name, email, password } -> { access_token, user } */
+/** POST /api/auth/signup  { name, email, password } -> 201 { access_token, token_type, user } */
 export function signup({ name, email, password }) {
   return request((s) => {
     name = name.trim();
@@ -17,18 +17,18 @@ export function signup({ name, email, password }) {
     s.users.push(user);
     const access_token = `mock.${user.id}`;
     setToken(access_token);
-    return { access_token, user: publicUser(user) };
+    return { access_token, token_type: 'bearer', user: publicUser(user) };
   }, { write: true });
 }
 
-/** POST /api/auth/login  { email, password } -> { access_token, user } */
+/** POST /api/auth/login  { email, password } -> { access_token, token_type, user } */
 export function login({ email, password }) {
   return request((s) => {
     const user = s.users.find((u) => u.email === email.trim().toLowerCase());
     if (!user || user.password !== password) fail(401, 'Wrong email or password.');
     const access_token = `mock.${user.id}`;
     setToken(access_token);
-    return { access_token, user: publicUser(user) };
+    return { access_token, token_type: 'bearer', user: publicUser(user) };
   });
 }
 
